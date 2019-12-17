@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="GLSL Shader" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1Sv7fTakDLggSMIkQUZ6cve0bzs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../common/VectorUtils3.c" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.C/C++" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" RUN_PATH="$PROJECT_DIR$/project" EXPLICIT_BUILD_TARGET_NAME="all">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="StructureViewFactory">
+    <option name="AUTOSCROLL_FROM_SOURCE" value="true" />
+    <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="" />
+      <created>1572432318330</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1572432318330</updated>
+      <workItem from="1572432319921" duration="7355000" />
+      <workItem from="1572509066630" duration="6682000" />
+      <workItem from="1572523976898" duration="4807000" />
+      <workItem from="1572602119795" duration="5773000" />
+      <workItem from="1572786205350" duration="4632000" />
+      <workItem from="1572858654711" duration="5813000" />
+      <workItem from="1572943700486" duration="15550000" />
+      <workItem from="1573032080385" duration="6975000" />
+      <workItem from="1573039377679" duration="373000" />
+      <workItem from="1573039920959" duration="11084000" />
+      <workItem from="1573135820432" duration="5498000" />
+      <workItem from="1573285157935" duration="1314000" />
+      <workItem from="1573282904332" duration="2262000" />
+      <workItem from="1573290156142" duration="1539000" />
+      <workItem from="1573305879222" duration="257000" />
+      <workItem from="1573375907730" duration="3853000" />
+      <workItem from="1573379980674" duration="2276000" />
+      <workItem from="1573718309888" duration="9572000" />
+      <workItem from="1573734525779" duration="3522000" />
+      <workItem from="1574068868446" duration="6553000" />
+      <workItem from="1574243291356" duration="4649000" />
+      <workItem from="1574324958140" duration="9654000" />
+      <workItem from="1574424472966" duration="798000" />
+      <workItem from="1574449316577" duration="2913000" />
+      <workItem from="1574590513868" duration="602000" />
+      <workItem from="1574673900550" duration="4892000" />
+      <workItem from="1574705798164" duration="4699000" />
+      <workItem from="1574757616041" duration="5322000" />
+      <workItem from="1574764440398" duration="4406000" />
+      <workItem from="1575028809674" duration="656000" />
+      <workItem from="1575375831773" duration="2274000" />
+      <workItem from="1575447071043" duration="1530000" />
+      <workItem from="1575461879916" duration="1240000" />
+      <workItem from="1575535783299" duration="351000" />
+      <workItem from="1575794967289" duration="2808000" />
+      <workItem from="1575894145580" duration="11588000" />
+      <workItem from="1575968442492" duration="1423000" />
+      <workItem from="1575973583990" duration="1273000" />
+      <workItem from="1576141988208" duration="2534000" />
+      <workItem from="1576151830568" duration="599000" />
+      <workItem from="1576491646340" duration="1723000" />
+      <workItem from="1576514685455" duration="608000" />
+      <workItem from="1576572905467" duration="1212000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1575902287423">
+      <screen x="70" y="27" width="1850" height="1053" />
+    </state>
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup/70.27.1850.1053@70.27.1850.1053" timestamp="1575902287423" />
+  </component>
+</project>
