@@ -5,3 +5,5 @@ Please note that you requier "GLUtilities.H" and "MicroGlut.h" as well as Ingema
 If using Ingemar Ragnemalms "common"- folder, place both the project-folder and common in the same parent folder.
 
 Use makefile to build. Designed to complile and run for Ubuntu Linux but adapt it as you wish.
+
+Run the file "project" to run the program precompiled (Linux).
