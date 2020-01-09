@@ -10,11 +10,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mainFire.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mainFire.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/window.frag" beforeDir="false" afterPath="$PROJECT_DIR$/window.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/window.vert" beforeDir="false" afterPath="$PROJECT_DIR$/window.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +136,7 @@
       <workItem from="1576491646340" duration="1723000" />
       <workItem from="1576514685455" duration="608000" />
       <workItem from="1576572905467" duration="1212000" />
-      <workItem from="1578565792458" duration="974000" />
+      <workItem from="1578565792458" duration="3096000" />
     </task>
     <servers />
   </component>

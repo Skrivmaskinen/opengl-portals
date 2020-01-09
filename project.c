@@ -77,7 +77,7 @@ Model* squareModel;
 Point3D cam, point, teleCam;
 Model *model1, *cube, *teapot;
 FBOstruct *fbo1, *fbo2, *fbo_unfiltered, *fbo_finished, *fbo_screen1;
-GLuint plain_white_shader =0, phongshader = 0, plaintextureshader = 0, blur_shader = 0, truncate_shader = 0, merger_shader = 0, window_shader = 0, screen_shader = 0;
+GLuint plain_white_shader =0, phongshader = 0, plaintextureshader = 0, blur_shader = 0, truncate_shader = 0, merger_shader = 0, window_shader = 0, screen_shader = 0, fire_shader = 0;
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
@@ -308,12 +308,17 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     vm2 = Mult(vm2, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
     vm2 = Mult(vm2, Rxyz(in->rotation));
 
+    mat4 vm3;
+    vm3 = T(in->position.x, in->position.y, in->position.z);
+    vm3 = Mult(vm3, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
+    vm3 = Mult(vm3, Rxyz(in->rotation));
     // Send to phongshader
-    if(in->shader == phongshader || in->shader == window_shader || in->shader == plain_white_shader)
+    if(in->shader == phongshader || in->shader == window_shader || in->shader == plain_white_shader || in->shader == fire_shader)
     {
         // Send information
         glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
+        glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, vm3.m);
         glUniform3fv(glGetUniformLocation(in->shader, "lightPoint"), 1, &(UP_VECTOR.x));
 
         glUniform3fv(glGetUniformLocation(in->shader, "camPos"), 1, &(activeCam->position.x) );
@@ -558,14 +563,15 @@ void initConstants()
 void initShaders()
 {
     // Load and compile shaders initShader
-    plaintextureshader = loadShaders("plaintextureshader.vert", "plaintextureshader.frag");  // puts texture on teapot
-    phongshader = loadShaders("phong.vert", "phong.frag");  // renders with light (used for initial renderin of teapot)
-    blur_shader = loadShaders("blur.vert", "blur.frag"); // Low pass filter
-    truncate_shader=loadShaders("truncate.vert", "truncate.frag"); // Get the overexponated part of the image
-    merger_shader = loadShaders("merge.vert", "merge.frag"); //Combine two FBOs to a singe output
-    window_shader = loadShaders("window.vert", "window.frag");
-    screen_shader = loadShaders("screen.vert", "screen.frag");
-    plain_white_shader = loadShaders("plain_white.vert", "plain_white.frag");
+    plaintextureshader  = loadShaders("plaintextureshader.vert", "plaintextureshader.frag");  // puts texture on teapot
+    phongshader         = loadShaders("phong.vert", "phong.frag");  // renders with light (used for initial renderin of teapot)
+    blur_shader         = loadShaders("blur.vert", "blur.frag"); // Low pass filter
+    truncate_shader     = loadShaders("truncate.vert", "truncate.frag"); // Get the overexponated part of the image
+    merger_shader       = loadShaders("merge.vert", "merge.frag"); //Combine two FBOs to a singe output
+    window_shader       = loadShaders("window.vert", "window.frag");
+    screen_shader       = loadShaders("screen.vert", "screen.frag");
+    plain_white_shader  = loadShaders("plain_white.vert", "plain_white.frag");
+    fire_shader         = loadShaders("mainFire.vert", "mainFire.frag");
     printError("init shader");
 
 }
@@ -596,42 +602,24 @@ void initSceneObjects()
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
 
-    bunnyObject = newSceneObject(model1, phongshader, SetVector(0, -1, 5), 40.0, scene1Root);
-    smallBunnyObject = newSceneObject(model1, phongshader, SetVector(17, -1, -27), 30, scene1Root);
-    smallerBunnyObject = newSceneObject(model1, phongshader, SetVector(-2, -1, -3), 20, scene1Root);
+    //bunnyObject = newSceneObject(model1, phongshader, SetVector(0, -1, 5), 40.0, scene1Root);
+    //smallBunnyObject = newSceneObject(model1, phongshader, SetVector(17, -1, -27), 30, scene1Root);
+    //smallerBunnyObject = newSceneObject(model1, phongshader, SetVector(-2, -1, -3), 20, scene1Root);
 
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 40, scene1Root);
+    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, -20.5), 40, scene1Root);
-    cubeFloorObject->scaleV.z = 0.5;
-
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 20), 40, scene1Root);
-    cubeFloorObject->scaleV.z = 0.5;
-
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(20, -1, 0), 40, scene1Root);
-    cubeFloorObject->scaleV.x = 0.5;
-
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(-20, -1, 0), 40, scene1Root);
-    cubeFloorObject->scaleV.x = 0.5;
-
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(10, 5, -5.5), 11, scene1Root);
-    cubeFloorObject->scaleV.z = 0.5;
+    SceneObject* mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 5, scene1Root);
+    mainFire->scaleV.z = 1;
 
 
-    openingObject = newSceneObject(cube, plain_white_shader, SetVector(-15, 5, 5), 10, NULL);
-    openingObject->scaleV.z = 0.1;
-
-    openingFrameObject =  newSceneObject(cube, plain_white_shader, SetVector(-15, 5, 4.9), 10.5, scene1Root);
-    openingFrameObject->scaleV.z = 0.1;
 
     playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
 
-    newSceneObject(teapot, window_shader, SetVector(15, 2, 5), 5, scene1Root);
+    //newSceneObject(teapot, window_shader, SetVector(15, 2, 5), 5, scene1Root);
 
-    SceneObject *portalFrame = newSceneObject(cube, window_shader, SetVector(-15, 5, -20.1), 11, scene1Root);
-    portalFrame->scaleV.z = 0.1;
+
 }
 void initCameras()
 {
