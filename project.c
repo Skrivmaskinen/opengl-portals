@@ -61,13 +61,12 @@ GLfloat squareTexCoord[] = {
 GLuint squareIndices[] = {0, 1, 2, 0, 2, 3};
 
 // initial width and heights
-#define W 1980
-#define H 1050
+#define W 1000
+#define H 750
 
-#define NUM_LIGHTS 4
+#define NUM_LIGHTS 1
 #define PI 3.1415
 
-int teleporting = 0;
 void OnTimer(int value);
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -83,22 +82,11 @@ GLuint plain_white_shader =0, phongshader = 0, plaintextureshader = 0, blur_shad
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
         *smallBunnyObject, *smallerBunnyObject, *scene1Root;
-struct Portal *portal1, *portal2;
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                Struct definitions                              */
 ////////////////////////////////////////////////////////////////////////////////////
-
-typedef struct CoordTriple
-{
-    // normal = x, UP_VECTOR = y, side = z
-    // Normal
-    vec3 n_axis;
-    // Up
-    vec3 u_axis;
-    // Side
-    vec3 s_axis;
-}CoordTriple, *CoordTriplePtr;
 
 typedef struct Camera
 {
@@ -131,60 +119,18 @@ typedef struct SceneObject
 
 }SceneObject, *SceneObjectPtr;
 
-// A portal that renders the view from a camera to a surface.
-typedef struct Portal
-{
-    // The view. Rendered on top of surface.
-    vec3 recorderPosition;
-    CoordTriple *recorderCoord;
-    Camera *recordingCamera;
-
-    // The surface.
-    vec3 surfacePosition;
-    CoordTriple *surfaceCoord;
-    SceneObject *surfaceSceneObject;
-
-
-} Portal, *PortalPtr;
-
-struct CoordTriple *screenCoords;
-struct CoordTriple *recorderCoords;
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                Header                                          */
 ////////////////////////////////////////////////////////////////////////////////////
 // Constructors
 struct Camera*      newCamera(vec3 inPosition, vec3 inTarget);
 struct SceneObject* newSceneObject(Model* inModel, GLuint inShader, vec3 inPosition, float inScale, SceneObject *root);
-struct CoordTriple* newCoordTriple(vec3 position, vec3 target);
-struct Portal*      newPortal(vec3 inRecorderPosition, vec3 inRecorderNormal, vec3 inSurfacePosition, vec3 inSurfaceNormal);
+
 void enlistSceneObject(SceneObject *root, SceneObject *newSceneObject);
 
 mat4 Rxyz(vec3 rotationVector);
 vec3 getRotationOfNormal(vec3 theVector, vec3 x_axis, vec3 y_axis);
 void getScreenAxis(SceneObject *this, vec3 *out_X, vec3 *out_Y);
-
-vec3 global2local(CoordTriple *system, vec3 origin, vec3 position);
-vec3 local2global(CoordTriple *system, vec3 origin, vec3 coordinates);
-
-////////////////////////////////////////////////////////////////////////////////////
-/*                                Coord Triple                                    */
-////////////////////////////////////////////////////////////////////////////////////
-
-struct CoordTriple* newCoordTriple(vec3 position, vec3 target)
-{
-    struct CoordTriple *this;
-    this = (CoordTriple *)malloc(sizeof(CoordTriple));
-
-    vec3 normal = Normalize(VectorSub(target, position));
-    vec3 side  = Normalize(SetVector(normal.z, 0, normal.x));
-    vec3 up     = CrossProduct(RIGHT_VECTOR, normal);
-
-    this->n_axis = normal;
-    this->s_axis = side;
-    this->u_axis = up;
-
-    return this;
-}
 
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                Cameras                                         */
@@ -344,116 +290,6 @@ void setRotation(SceneObject* in, float inX, float inY, float inZ)
     in->rotation = SetVector(inX, inY, inZ);
 }
 
-void stencilSceneObject(SceneObject* in, Camera* activeCam)
-{
-    // Activate shader program
-    glUseProgram(in->shader);
-
-    // Initialize view matrix
-    mat4 vm2;
-    vm2 = activeCam->world2view;
-
-    // Set location
-    vm2 = Mult(vm2, T(in->position.x, in->position.y, in->position.z));
-    vm2 = Mult(vm2, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
-    vm2 = Mult(vm2, Rx(in->rotation.x));
-    vm2 = Mult(vm2, Ry(in->rotation.y));
-    vm2 = Mult(vm2, Rz(in->rotation.z));
-
-    // Send information
-    glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
-    glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-
-
-    // Reset stencil
-    glClear(GL_STENCIL_BUFFER_BIT);
-
-    // Enable stencil
-    glEnable(GL_STENCIL_TEST);
-
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glDepthMask(GL_FALSE);
-
-
-    // Replace fragment with '1' when drawn to.
-    glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF); // GL_ALWAYS (ingmar)
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // GL_REPLACE (ingmar)
-
-    // Draw model. Fragment shader irrelevant, but vertex needed.
-    DrawModel(in->model, in->shader, "in_Position", NULL, NULL);
-
-    // Turn on the color and depth buffer to allow normal rendering.
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDepthMask(GL_TRUE);
-
-    // Don't throw away stencil. We will probably render several objects in with the same stencil.
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-
-
-    // When done with stencil, use glDisable(GL_STENCIL_TEST);
-}
-void stencilSceneObjectWhite(SceneObject* in, Camera* activeCam)
-{
-    // Activate shader program
-    glUseProgram(plain_white_shader);
-
-    // Initialize view matrix
-    mat4 vm2;
-    vm2 = activeCam->world2view;
-
-    // Set location
-    vm2 = Mult(vm2, T(in->position.x, in->position.y, in->position.z));
-    vm2 = Mult(vm2, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
-    vm2 = Mult(vm2, Rx(in->rotation.x));
-    vm2 = Mult(vm2, Ry(in->rotation.y));
-    vm2 = Mult(vm2, Rz(in->rotation.z));
-
-    // Send information
-    glUniformMatrix4fv(glGetUniformLocation(plain_white_shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
-    glUniformMatrix4fv(glGetUniformLocation(plain_white_shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-
-
-    DrawModel(in->model, plain_white_shader, "in_Position", NULL, NULL);
-
-}
-void stencil_0_init()
-{
-    // Reset stencil
-    glClear(GL_STENCIL_BUFFER_BIT);
-
-    // Enable stencil
-    glEnable(GL_STENCIL_TEST);
-
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glDepthMask(GL_TRUE);
-}
-
-int STENCIL_LET_THROUGH = 1;
-int STENCIL_BLOCK = 0;
-void stencil_1_creation(int mode)
-{
-    // Replace fragment with 'mode' when drawn to.
-    glStencilFunc(GL_ALWAYS, mode, 0xFFFFFFFF); // GL_ALWAYS (ingmar)
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // GL_REPLACE (ingmar)
-
-}
-int STENCIL_DRAW_INSIDE = 1;
-int STENCIL_DRAW_OUTSIDE = 0;
-void stencil_2_draw(int mode)
-{
-
-    // Turn on the color and depth buffer to allow normal rendering.
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDepthMask(GL_TRUE);
-
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-}
-void stencil_3_end()
-{
-    glDisable(GL_STENCIL_TEST);
-}
-
 
 void renderSceneObject(SceneObject* in, Camera* activeCam)
 {
@@ -563,96 +399,10 @@ void renderScene(SceneObject *scene, Camera *activeCamera)
     }
 
 }
-void renderSceneFromPortal(SceneObject *scene, Portal *activePortal)
-{
-    SceneObject *current = scene;
-
-    // Check if there is another SceneObject
-    while(current->next != NULL)
-    {
-        // Advance in list
-        current = current->next;
-
-        //
-        vec3 localPosition = global2local(activePortal->recorderCoord, activePortal->recorderPosition, current->position);
-
-        if(localPosition.x < 0 )
-        {
-            // Render SceneObject
-            renderSceneObject(current, activePortal->recordingCamera);
-        }
-
-    }
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                 Portal                                         */
 ////////////////////////////////////////////////////////////////////////////////////
 
-// Create a new Portal. Recorder is from where the portal records the scene. Surface is the object that the portal shows this scene on.
-struct Portal* newPortal(vec3 inRecorderPosition, vec3 inRecorderNormal, vec3 inSurfacePosition, vec3 inSurfaceNormal)
-{
-    // --- Pre-processing
-    // Normalize normal in case of incompetence.
-    inRecorderNormal    = Normalize(inRecorderNormal);
-    inSurfaceNormal     = Normalize(inSurfaceNormal);
-
-    // --- Allocation
-    // Allocate memory
-    Portal* this;
-    this = (Portal *)malloc(sizeof(Portal));
-
-    float portalThickness = 0.1;
-    // --- Surface assignment
-    this->surfacePosition       = inSurfacePosition;
-    this->surfaceCoord          = newCoordTriple(inSurfacePosition, VectorAdd(inSurfacePosition, inSurfaceNormal));
-    this->surfaceSceneObject    = newSceneObject(cube, plain_white_shader, VectorSub(inSurfacePosition, ScalarMult(inSurfaceNormal, portalThickness/2)), 10, NULL);
-    // Flatten the surface.
-    this->surfaceSceneObject->scaleV.z = portalThickness;
-    // Set rotation according to normal.
-    this->surfaceSceneObject->rotation = getRotationOfNormal(inSurfaceNormal, RIGHT_VECTOR, UP_VECTOR);
-
-    // --- Recorder assignment
-    this->recorderPosition  = inRecorderPosition;
-    this->recordingCamera   = newCamera(this->recorderPosition, VectorAdd(this->recorderPosition, inRecorderNormal));
-    this->recorderCoord     = newCoordTriple(inRecorderPosition, VectorAdd(inRecorderPosition, inRecorderNormal));
-
-    return this;
-
-}
-
-// Convert position and target of 'looker' into a new perspective for 'this' Portal.
-void updatePortal(Portal *this, Camera *looker)
-{
-    // Camera *looker   : The camera that is viewing the portal surface.
-    // Portal *this     : The portal that 'looker' is looking at.
-    ///////////////////////////////////////////////////////////////////////////
-
-    // Convert 'looker's position  and target into arbitrary local coordinates.
-    vec3 lookerLocalPosition    = global2local(this->surfaceCoord, this->surfacePosition, looker->position);
-    vec3 lookerLocalTarget      = global2local(this->surfaceCoord, this->surfacePosition, looker->target);
-
-    // The recording camera of the portal => 'cam'
-    Camera *cam = this->recordingCamera;
-
-    // Convert the local coordinates into global coordinates at the recording camera.
-    vec3 cameraGlobalPosition   = local2global(this->recorderCoord, cam->position, lookerLocalPosition);
-    vec3 cameraGlobalTarget     = local2global(this->recorderCoord, cam->position, lookerLocalTarget);
-
-    // Set position- and target-offset for cam from its position.
-    cam->positionOffset = VectorSub(cameraGlobalPosition, cam->position);
-    cam->targetOffset   = VectorSub(cameraGlobalTarget,   cam->position);
-
-    // Recalculate cams world2view matrix.
-    calcWorld2View(cam);
-
-}
-
-void renderPortal(Portal *this)
-{
-
-}
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                  Input                                         */
 ////////////////////////////////////////////////////////////////////////////////////
@@ -906,14 +656,10 @@ void init(void)
     initCameras();
 
 
-    screenCoords = newCoordTriple(openingObject->position, VectorAdd(openingObject->position, SetVector(0, 0, -1.0)) );
-    recorderCoords = newCoordTriple(surveillanceCamera->position, surveillanceCamera->target);
     //////////////////////////////////////
     // TODO: lightsources
     //////////////////////////////////////
 
-    portal1 = newPortal(SetVector(-15, 5, -20), SetVector(0, 0, -1), SetVector(10, 5, -5), SetVector(0, 0, 1));
-    portal2 = newPortal(SetVector(10, 5, -5), SetVector(0, 0, -1), SetVector(-15, 5, -20), SetVector(0, 0, 1));
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -944,55 +690,6 @@ vec3 getRotationOfNormal(vec3 theVector, vec3 x_axis, vec3 y_axis)
     return outRadians;
 }
 
-// Calculates coordinate system axises from position and normal.
-void updateCoordTriple(vec3 position, vec3 target, CoordTriple *this)
-{
-
-    vec3 normal_ = Normalize(VectorSub(target, position));
-    vec3 side_  = Normalize(SetVector(normal_.z, 0, normal_.x));
-    vec3 up_     = CrossProduct(RIGHT_VECTOR, normal_);
-
-    this->n_axis = normal_;
-    this->s_axis = side_;
-    this->u_axis = up_;
-}
-
-// Returns the LOCAL coordinates of a point in WORLD coordinates
-vec3 global2local(CoordTriple *system, vec3 origin, vec3 position)
-{
-    // system   : the ON-axises the local system is based on
-    // origin   : the point from which the system has its origo
-    // position : the point that is to be converted
-    ///////////////////////////////////////////////////////////
-
-    // Reposition to origo
-    position = VectorSub(position, origin);
-    // How much of each axis does the point go?
-    vec3 out;
-    out.x = DotProduct(position, system->n_axis);
-    out.y = DotProduct(position, system->u_axis);
-    out.z = DotProduct(position, system->s_axis);
-    return out;
-}
-
-// Returns the WORLD coordinates of a point in LOCAL coordinates
-vec3 local2global(CoordTriple *system, vec3 origin, vec3 coordinates)
-{
-    // system   : the ON-axises the local system is based on
-    // origin   : the point from which the system has its origo
-    // coordinates : the coordinates the returned point has in local
-    /////////////////////////////////////////////////////////////////
-    // Based at the origin.
-    vec3 out = origin;
-
-    // Add coordinates
-    // normal = x, up = y, side = z
-    out = VectorAdd(out, ScalarMult(system->n_axis, coordinates.x));
-    out = VectorAdd(out, ScalarMult(system->u_axis, coordinates.y));
-    out = VectorAdd(out, ScalarMult(system->s_axis, coordinates.z));
-    return out;
-}
-
 // Rotation in xyz directions
 mat4 Rxyz(vec3 rotationVector)
 {
@@ -1001,36 +698,6 @@ mat4 Rxyz(vec3 rotationVector)
     mat4 rotZ = Rz(rotationVector.z);
 
     return Mult(rotX, Mult(rotY, rotZ));
-}
-
-void teleportationCheck(Camera *player, Portal *thePortal)
-{
-    // Get players position in local coordinates.
-    vec3 localPlayerPosition = global2local(thePortal->surfaceCoord, thePortal->surfacePosition, player->position);
-    //printVec3(localPlayerPosition);
-    // Is player within the square?
-    if (  abs(localPlayerPosition.z) <  5 && abs(localPlayerPosition.y) <  5 )
-    {
-        // Is player behind the portal, but still not too far behind it?
-        if ( localPlayerPosition.x <= 0.0 && localPlayerPosition.x > -1 )
-        {
-            // --- Teleport player to the recorder!
-            // Get local coords of players target
-            vec3 localPlayerTarget = global2local(thePortal->surfaceCoord, thePortal->surfacePosition, player->target);
-
-            // Get new global position of player.
-            vec3 globalTeleportedPosition   = local2global(thePortal->recorderCoord, thePortal->recorderPosition, localPlayerPosition);
-            // Get new global target of player.
-            vec3 globalTeleportedTarget     = local2global(thePortal->recorderCoord, thePortal->recorderPosition, localPlayerTarget);
-            // Assign new values.
-            player->position = globalTeleportedPosition;
-            player->target   = globalTeleportedTarget;
-
-
-            teleporting = 1;
-
-        }
-    }
 }
 
 
@@ -1058,17 +725,10 @@ void display(void)
     // Character movement.
     characterControl(playerCamera, 6);
 
-    // Check if player has stepped through any portal.
-    teleportationCheck(playerCamera, portal1);
-    teleportationCheck(playerCamera, portal2);
-
     // Update players targetOffset.
     playerCamera->targetOffset = VectorSub(playerCamera->target, playerCamera->position);
     surveillanceCamera->targetOffset = VectorSub(surveillanceCamera->target, surveillanceCamera->position);
 
-    // Perspective of portals.
-    updatePortal(portal1, playerCamera);
-    updatePortal(portal2, playerCamera);
     // Move the players body. TODO: Maybe should be other way around but works for now.
     playerObject->position = playerCamera->position;
 
@@ -1082,97 +742,15 @@ void display(void)
     glClearColor(0.1, 0.1, 0.3, 0);
     // Clear color-, depth-, and stencil-buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    if (1 == 0) {
-        renderScene(scene1Root, surveillanceCamera);
-    } else {
-        //////////////////////////////////////
-        //        Stencil set-up            //
-        //////////////////////////////////////
-        // Enable stencil
-        glEnable(GL_STENCIL_TEST);
-
-        // Disable writing to color- and depth-buffers
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glDepthMask(GL_FALSE);
-
-        //////////////////////////////////////
-        //          Create stencil          //
-        //////////////////////////////////////
-        // GL_REPLACE : Always replaces buffer fragment with given value. Each portal is given a unique id.
-        glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
-        // Replace fragment with '1' when drawn to.
-        glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF);
-        // Render portal1 to stencil.
-        renderSceneObject(portal1->surfaceSceneObject, playerCamera);
-
-        // Replace fragment with '2' when drawn to.
-        glStencilFunc(GL_ALWAYS, 2, 0xFFFFFFFF);
-        // Render portal2 to stencil.
-        renderSceneObject(portal2->surfaceSceneObject, playerCamera);
-
-        //////////////////////////////////////
-        //       Render portal-view         //
-        //////////////////////////////////////
-        // Turn on the color and depth buffer to allow normal rendering.
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glDepthMask(GL_TRUE);
-
-        // Don't throw away stencil. We will probably render several objects in with the same stencil.
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-        // Render where stencil == 1
-        glStencilFunc(GL_EQUAL, 1, 0xFFFFFFFF);
-        // Render scene 1 to portal1.
-        renderSceneFromPortal(scene1Root, portal1);
-
-        // Render where stencil == 2
-        glStencilFunc(GL_EQUAL, 2, 0xFFFFFFFF);
-        // Render scene 1 to portal2.
-        renderSceneFromPortal(scene1Root, portal2);
-
-        //////////////////////////////////////
-        //    Block portal from player view //          Idea from: https://en.wikibooks.org/wiki/OpenGL_Programming/Mini-Portal#Clipping_the_portal_scene_-_stencil_buffer
-        //////////////////////////////////////
-        // Disable colour
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // DEBUGGING
-        // Enable depth
-        glDepthMask(GL_TRUE);
-        // Disable stencil-test
-        glDisable(GL_STENCIL_TEST);
-
-        // surfaceSceneObject is rendered to only the depth buffer, blocking new renders behind the portals.
-        renderSceneObject(portal1->surfaceSceneObject, playerCamera);
-        renderSceneObject(portal2->surfaceSceneObject, playerCamera);
-
-        //////////////////////////////////////
-        //        Draw player view          //
-        //////////////////////////////////////
-        // Enable rendering to color-buffer
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-        // Render the scene
-        renderScene(scene1Root, playerCamera);
-    }
+    // Render the scene
+    renderScene(scene1Root, playerCamera);
     //////////////////////////////////////
     //        End of render-loop        //
     //////////////////////////////////////
 
-    // Ugly, but it works! Discard the frame of the teleportation. Removes a *blipp* effect when teleporting.
-    // The portals refuse to render in the frame of teleportation. Don't know why. Would like to solve it "properly",
-    // but alas there is no time.
-    // Read something about z-near, but since I've tried putting the visual portal further away than the game portal
-    // with the effect persisting I am unsure if that is the cause.
-
-    if(teleporting == 0 || show_blipp == 1)
-    {
-        glutSwapBuffers();
-    } else
-    {
-        teleporting = 0;
-    }
+    glutSwapBuffers();
 }
 
 void reshape(GLsizei w, GLsizei h)
