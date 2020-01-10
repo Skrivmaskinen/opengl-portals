@@ -316,6 +316,7 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     if(in->shader == phongshader || in->shader == window_shader || in->shader == plain_white_shader || in->shader == fire_shader)
     {
         // Send information
+        glUniform1f(glGetUniformLocation(in->shader, "time"), time);
         glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
         glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, vm3.m);
@@ -609,7 +610,7 @@ void initSceneObjects()
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
-    SceneObject* mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 5, scene1Root);
+    SceneObject* mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, scene1Root);
     mainFire->scaleV.z = 1;
 
 
@@ -727,7 +728,7 @@ void display(void)
     //          Buffer cleaning         //
     //////////////////////////////////////
     // Sky box
-    glClearColor(0.1, 0.1, 0.3, 0);
+    glClearColor(0.0, 0.0, 0.0, 0);
     // Clear color-, depth-, and stencil-buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
