@@ -296,85 +296,44 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     // in: the SceneObject to render.
     // activeCam: the camera perspective to render to.
     //////////////////////////////////////
-    // Activate shader program
+
+    // <<Activate shader program>>
     glUseProgram(in->shader);
+    //------------------------------------
+    // <<Matrix creation>>
+    // Correctly placed in the WORLD
+    mat4 model2world;
+    model2world = T(in->position.x, in->position.y, in->position.z);
+    model2world = Mult(model2world, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
+    model2world = Mult(model2world, Rx(in->rotation.x));
+    model2world = Mult(model2world, Ry(in->rotation.y));
+    model2world = Mult(model2world, Rz(in->rotation.z));
 
-    // Initialize view matrix
-    mat4 vm2;
-    vm2 = activeCam->world2view;
+    // Correctly placed in the SCENE
+    mat4 model2view;
+    model2view = Mult(activeCam->world2view, model2world);
+    //------------------------------------
 
-    // Set location
-    vm2 = Mult(vm2, T(in->position.x, in->position.y, in->position.z));
-    vm2 = Mult(vm2, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
-    vm2 = Mult(vm2, Rxyz(in->rotation));
+    // <<Send information>>
+    glUniform1f(glGetUniformLocation(in->shader, "time"), time);
+    glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
+    glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2view"), 1, GL_TRUE, model2view.m);
+    glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, model2world.m);
+    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint"), 1, &(UP_VECTOR.x));
+    glUniform3fv(glGetUniformLocation(in->shader, "camPos"), 1, &(activeCam->position.x) );
+    glUniform1i(glGetUniformLocation(in->shader, "texUnit"), 0);
+    //------------------------------------
 
-    mat4 vm3;
-    vm3 = T(in->position.x, in->position.y, in->position.z);
-    vm3 = Mult(vm3, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
-    vm3 = Mult(vm3, Rxyz(in->rotation));
-    // Send to phongshader
-    if(in->shader == phongshader || in->shader == window_shader || in->shader == plain_white_shader || in->shader == fire_shader)
-    {
-        // Send information
-        glUniform1f(glGetUniformLocation(in->shader, "time"), time);
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, vm3.m);
-        glUniform3fv(glGetUniformLocation(in->shader, "lightPoint"), 1, &(UP_VECTOR.x));
-
-        glUniform3fv(glGetUniformLocation(in->shader, "camPos"), 1, &(activeCam->position.x) );
-        glUniform1i(glGetUniformLocation(in->shader, "texUnit"), 0);
-
-        // Enable Z-buffering
-        glEnable(GL_DEPTH_TEST);
-        // Enable backface culling
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        if(in->shader == plain_white_shader)
-        {
-
-            DrawModel(in->model, in->shader, "in_Position", NULL, NULL);
-        }
-        else
-        {
-            DrawModel(in->model, in->shader, "in_Position", "in_Normal", NULL);
-        }
-
-    }
-    else if(in->shader == screen_shader)
-    {
-        //useFBO(0L, fbo_finished, 0L);
-
-        glDisable(GL_CULL_FACE);
-        //glDisable(GL_DEPTH_TEST);
-
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-        glUniform1i(glGetUniformLocation(in->shader, "texUnit"), 0);
-
-        DrawModel(in->model, in->shader, "in_Position", NULL, "in_TexCoord");
-    }
-    else if(in->shader == plaintextureshader)
-    {
-        // Final output that is shown on screen
-
-        //	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
-        useFBO(0L, fbo_finished, 0L);
-        //glClearColor(0.0, 0.0, 0.0, 0);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Activate second shader program
-        glUseProgram(plaintextureshader);
-
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(in->shader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-        DrawModel(squareModel, plaintextureshader, "in_Position", NULL, "in_TexCoord");
-
-    }
+    // <<Set options>>
+    // Enable Z-buffering
+    glEnable(GL_DEPTH_TEST);
+    // Enable backface culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    //------------------------------------
+    // <<Draw>>
+    DrawModel(in->model, in->shader, "in_Position", "in_Normal", NULL);
+    //------------------------------------
 }
 
 void getScreenAxis(SceneObject *this, vec3 *out_X, vec3 *out_Y)
@@ -390,6 +349,7 @@ void getScreenAxis(SceneObject *this, vec3 *out_X, vec3 *out_Y)
     *out_Y = Y;
 }
 
+// Render all scene objects connected to a scene.
 void renderScene(SceneObject *scene, Camera *activeCamera)
 {
     SceneObject *current = scene;
@@ -405,10 +365,6 @@ void renderScene(SceneObject *scene, Camera *activeCamera)
     }
 
 }
-////////////////////////////////////////////////////////////////////////////////////
-/*                                 Portal                                         */
-////////////////////////////////////////////////////////////////////////////////////
-
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                  Input                                         */
 ////////////////////////////////////////////////////////////////////////////////////
@@ -597,6 +553,7 @@ void initModels()
             square, NULL, squareTexCoord, NULL,
             squareIndices, 4, 6);
 }
+SceneObject* mainFire;
 void initSceneObjects()
 {
     // The root of scene1
@@ -610,8 +567,8 @@ void initSceneObjects()
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
-    SceneObject* mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, scene1Root);
-    mainFire->scaleV.z = 1;
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, scene1Root);
+    mainFire->scaleV.x = 1;
 
 
 
@@ -643,12 +600,6 @@ void init(void)
     initModels();
     initSceneObjects();
     initCameras();
-
-
-    //////////////////////////////////////
-    // TODO: lightsources
-    //////////////////////////////////////
-
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -723,6 +674,15 @@ void display(void)
 
     // Walk on the ground please.
     playerObject->position.y = playerObject->scaleV.y / 2;
+
+    //////////////////////////////////////
+    /*          Object control          */
+    //////////////////////////////////////
+
+
+    //mainFire->position.y = 3;
+            //asin(DotProduct(Normalize(VectorSub(UP_VECTOR, playerCamera->position)), RIGHT_VECTOR));
+    //printf("%f \n",     mainFire->rotation.y);
 
     //////////////////////////////////////
     //          Buffer cleaning         //

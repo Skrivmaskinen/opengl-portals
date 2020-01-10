@@ -15,7 +15,6 @@
       <change beforePath="$PROJECT_DIR$/mainFire.vert" beforeDir="false" afterPath="$PROJECT_DIR$/mainFire.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/window.frag" beforeDir="false" afterPath="$PROJECT_DIR$/window.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/window.vert" beforeDir="false" afterPath="$PROJECT_DIR$/window.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -137,6 +136,7 @@
       <workItem from="1576514685455" duration="608000" />
       <workItem from="1576572905467" duration="1212000" />
       <workItem from="1578565792458" duration="17107000" />
+      <workItem from="1578645807850" duration="4316000" />
     </task>
     <servers />
   </component>

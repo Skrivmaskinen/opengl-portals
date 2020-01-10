@@ -139,9 +139,9 @@ void main(void)
 
     float intensity = snoise(vec3(x, 0.5*y - 2*out_time, 0)) + 0.5*snoise(vec3(2*x, y - 4*out_time, 0)) + 0.25*snoise(vec3(4*x, 2*y - 8*out_time, 0)); // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
 
-    float x_dist    = max(0, (1 - 0.4*abs(x - midFire.x) ));
-    float y_dist_up = max(0, (1 - 0.1*abs(y - midFire.y) ));
-    float y_dist_down = max(0, (1 - 0.7*abs(y - midFire.y) ));
+    float x_dist        = max(0, (1 - 0.4*abs(x - midFire.x) ));
+    float y_dist_up     = max(0, (1 - 0.1*abs(y - midFire.y) ));
+    float y_dist_down   = max(0, (1 - 0.7*abs(y - midFire.y) ));
 
     float y_dist = 0;
     if(y < midFire.y)
@@ -159,9 +159,9 @@ void main(void)
     float out_value = drop_distance *(intensity*0.25 + 0.75);
 
     float wobble = 1 + snoise(vec3(x, y, out_time));
-
     wobble = wobble/2;
-    out_value = step(out_value, 0.3 + 0.3*wobble) + step(out_value, 0.5+ 0.15*wobble) + step(out_value, 0.4 + + 0.3*wobble);
+
+    out_value = step(out_value, 0.3 + 0.3*wobble) + step(out_value, 0.5+ 0.15*wobble) + step(out_value, 0.4 + 0.3*wobble);
     out_value = out_value/3;
 
     if(out_value < 0.1)
