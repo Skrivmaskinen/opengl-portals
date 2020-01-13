@@ -89,10 +89,10 @@ void main(void)
 {
     const vec3 light = vec3(0, 0.7, 0);
 
-    vec4 color = vec4(1, 0.60, 0, 1.0);
+    vec3 color = vec3(1, 0.60, 0);
     vec3 lightDirection = normalize(light - exSurface);
     float intensity = dot(lightDirection, exNormal);
     float wobbel = snoise(vec2(0, 7*out_time));
-    outColor = color*intensity*(1 + wobbel*0.2);
+    outColor = vec4(color*intensity*(1 + wobbel*0.2), 1);
     //outColor = vec4(out_Position, 1);
 }

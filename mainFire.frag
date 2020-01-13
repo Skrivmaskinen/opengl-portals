@@ -140,16 +140,23 @@ void main(void)
     float z = exSurface.z - f_objectCenter.z;
 
 
-    float intensity =   snoise(vec3(x, 0.5*y - 2*out_time, z))*1.0;
-    intensity +=        snoise(vec3(2*x, y - 4*out_time, z))*0.5;
-    intensity +=        snoise(vec3(4*x, 2*y - 8*out_time, z))*0.25; // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
+    // Perlin noise that forms the base of th fire.
+    // Flame patches are elongated along the y-axis by a factor of two.
+    // The noise slides upwards to emulate the rising flames.
+    float flame_noise =   snoise(vec3(x, 0.5*y - 2*out_time, z))*1.0;
+    flame_noise +=        snoise(vec3(2*x, y - 4*out_time, z))*0.5;
+    flame_noise +=        snoise(vec3(4*x, 2*y - 8*out_time, z))*0.25; // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
 
-    //intensity = 0;
+    // Create a "drop"-shape gradient.
+    //  x
     float x_dist        = max(0, (1 - 0.4*abs(x - midFire.x) ));
-    float z_dist        = max(0, (1 - 0.4*abs(z - midFire.z) ));
+    //  y
     float y_dist_up     = max(0, (1 - 0.1*abs(y - midFire.y) ));
     float y_dist_down   = max(0, (1 - 0.7*abs(y - midFire.y) ));
+    //  z
+    float z_dist        = max(0, (1 - 0.4*abs(z - midFire.z) ));
 
+    // The drop has a different y distance depending of whether the fragment is above or below the flames midpoint.
     float y_dist = 0;
     if(y < midFire.y)
     {
@@ -159,68 +166,34 @@ void main(void)
     {
         y_dist = y_dist_up;
     }
-    float drop_distance =  x_dist * y_dist*z_dist;
+    // Multiply all invers-distances to get the drop-gradient.
+    float drop_gradient=  x_dist * y_dist*z_dist;
 
-    float out_value = drop_distance *(intensity*0.25 + 0.75);
+    // The final intensity is determined by a mix of the noise and drop gradient
+    float fire_intensity = drop_gradient*(flame_noise*0.25 + 0.75);
 
+    // Some extra wobble is added to create more discontinous patches of flames flying in the air.
+    // Has values [0, 1]
     float wobble = 1 + snoise(vec3(x, y, out_time));
     wobble = wobble/2;
 
-    out_value = step(out_value, 0.3 + 0.3*wobble) + step(out_value, 0.5+ 0.15*wobble) + step(out_value, 0.4 + 0.3*wobble);
-    out_value = out_value/3;
+    // The transparency of the flame.
+    float transparency = 0.5;
 
-
-    if(out_value < 0.1)
+    if(fire_intensity < 0.3 + 0.1*wobble)
     {
         discard;
     }
-    else if(out_value < 0.4)
+    else if(fire_intensity < 0.4 + 0.1*wobble)
     {
-        outColor = vec4(1.0, 0.3, 0, 1.0);
+        outColor = vec4(1.0, 0.3, 0, transparency);
     }
-    else if(out_value < 0.7)
+    else if(fire_intensity < 0.5+ 0.1*wobble)
     {
-        outColor = vec4(1, 0.60, 0, 1.0);
+        outColor = vec4(1, 0.60, 0, transparency);
     }
     else
     {
-        outColor = vec4(1, 0.9, 0.8, 1.0);
+        outColor = vec4(1, 0.9, 0.8, transparency);
     }
-    //outColor = vec4(out_value,out_value,out_value,  1.0);
-    //outColor = vec4(out_Position, 1);
 }
-
-/*
-void main(void)
-{
-    const vec3 midFire = vec3(0, 1.5, 0);
-    float x = exSurface.x;
-    float y = exSurface.y;
-
-    float intensity = snoise(vec3(x*0.5, 0.5*y - 2*out_time, 2*out_time)); // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
-
-    float x_dist    = max(0, (1 - 0.7*abs(x - midFire.x) ));
-    float y_dist_up = max(0, (1 - 0.15*abs(y - midFire.y) ));
-    float y_dist_down = max(0, (1 - 0.7*abs(y - midFire.y) ));
-
-    float y_dist = 0;
-    if(y < midFire.y)
-    {
-        y_dist = y_dist_down;
-    }
-    else
-    {
-        y_dist = y_dist_up;
-    }
-    float drop_distance =  x_dist * y_dist;
-    float alt_dist = max( abs(0.5*x - 0.15*y),  abs(0.5*x + 0.15*y) ) ;
-    float inv_alt_dist = max(0, 1 - alt_dist);
-
-    float out_value = drop_distance *(intensity*0.25 + 0.75);
-
-
-    out_value = step(out_value, 0.3);
-
-    outColor = vec4(out_value,out_value,out_value,  1.0);
-    //outColor = vec4(out_Position, 1);
-}*/

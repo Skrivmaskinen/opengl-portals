@@ -518,6 +518,9 @@ void initGL()
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
+    glBlendFunc(GL_ONE, GL_ZERO);
     printError("GL inits");
 }
 void initConstants()
@@ -564,43 +567,41 @@ void initModels()
             square, NULL, squareTexCoord, NULL,
             squareIndices, 4, 6);
 }
+
 SceneObject* mainFire;
 void initSceneObjects()
 {
     // The root of scene1
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
-
-    //bunnyObject = newSceneObject(model1, phongshader, SetVector(0, -1, 5), 40.0, scene1Root);
-    //smallBunnyObject = newSceneObject(model1, phongshader, SetVector(17, -1, -27), 30, scene1Root);
-    //smallerBunnyObject = newSceneObject(model1, phongshader, SetVector(-2, -1, -3), 20, scene1Root);
-
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
+    // The number of logs around the fire.
     int count_logs = 10;
     for (int i = 0; i < count_logs; ++i)
     {
+        // The angle that the log is positioned at.
         float log_radians = 2*PI*i/count_logs;
-        printf("%f \n",log_radians);
-        cubeFloorObject = newSceneObject(cube, phongshader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
-        cubeFloorObject->scaleV.y = 0.5;
-        cubeFloorObject->scaleV.x = 0.5;
-        cubeFloorObject->rotation.y = -log_radians-PI/2;
-        cubeFloorObject->rotation.x = PI/4*sin(log_radians);
-        cubeFloorObject->rotation.z = PI/4*cos(log_radians);
-
+        //printf("%f \n",log_radians);
+        // Create a log sceneobject and add it to the scene1root. Position 1 unit away from fire at log_radians angle.
+        SceneObject* fire_log = newSceneObject(cube, phongshader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
+        // Make the log a thin line
+        fire_log->scaleV.y = 0.5;
+        fire_log->scaleV.x = 0.5;
+        // Point the log at the fire.
+        fire_log->rotation.y = -log_radians-PI/2;
+        // Make log semi-stand up.
+        fire_log->rotation.x = PI/4*sin(log_radians);
+        fire_log->rotation.z = PI/4*cos(log_radians);
     }
 
-
-    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 5, scene1Root);
+    // The flame in the bonfire.
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, NULL);
     mainFire->scaleV.z = 1;
 
     playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
-
-    //newSceneObject(teapot, window_shader, SetVector(15, 2, 5), 5, scene1Root);
-
 
 }
 void initCameras()
@@ -729,8 +730,14 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
+    // No transparency for objects
+    glBlendFunc(GL_ONE, GL_ZERO);
     // Render the scene
     renderScene(scene1Root, playerCamera);
+
+    // Additive blending for fire
+    glBlendFunc(GL_ONE, GL_ONE);
+    renderSceneObject(mainFire, playerCamera);
     //////////////////////////////////////
     //        End of render-loop        //
     //////////////////////////////////////
