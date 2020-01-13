@@ -303,12 +303,22 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     // <<Matrix creation>>
     // Correctly placed in the WORLD
     mat4 model2world;
+
     model2world = T(in->position.x, in->position.y, in->position.z);
-    model2world = Mult(model2world, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
     model2world = Mult(model2world, Rx(in->rotation.x));
     model2world = Mult(model2world, Ry(in->rotation.y));
     model2world = Mult(model2world, Rz(in->rotation.z));
 
+    model2world = Mult(model2world, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
+    /*
+    mat4 model2world;
+    model2world = Rx(in->rotation.x);
+    model2world = Mult(model2world, Ry(in->rotation.y));
+    model2world = Mult(model2world, Rz(in->rotation.z));
+
+    model2world = Mult(model2world, T(in->position.x, in->position.y, in->position.z));
+    model2world = Mult(model2world, S(in->scaleV.x, in->scaleV.y, in->scaleV.z));
+    */
     // Correctly placed in the SCENE
     mat4 model2view;
     model2view = Mult(activeCam->world2view, model2world);
@@ -320,6 +330,7 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2view"), 1, GL_TRUE, model2view.m);
     glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, model2world.m);
     glUniform3fv(glGetUniformLocation(in->shader, "lightPoint"), 1, &(UP_VECTOR.x));
+    glUniform3fv(glGetUniformLocation(in->shader, "objectCenter"), 1, &(in->position.x));
     glUniform3fv(glGetUniformLocation(in->shader, "camPos"), 1, &(activeCam->position.x) );
     glUniform1i(glGetUniformLocation(in->shader, "texUnit"), 0);
     //------------------------------------
@@ -567,10 +578,23 @@ void initSceneObjects()
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
-    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, scene1Root);
-    mainFire->scaleV.x = 1;
+    int count_logs = 10;
+    for (int i = 0; i < count_logs; ++i)
+    {
+        float log_radians = 2*PI*i/count_logs;
+        printf("%f \n",log_radians);
+        cubeFloorObject = newSceneObject(cube, phongshader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
+        cubeFloorObject->scaleV.y = 0.5;
+        cubeFloorObject->scaleV.x = 0.5;
+        cubeFloorObject->rotation.y = -log_radians-PI/2;
+        cubeFloorObject->rotation.x = PI/4*sin(log_radians);
+        cubeFloorObject->rotation.z = PI/4*cos(log_radians);
+
+    }
 
 
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 5, scene1Root);
+    mainFire->scaleV.z = 1;
 
     playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
@@ -679,10 +703,22 @@ void display(void)
     /*          Object control          */
     //////////////////////////////////////
 
+    // rotate fire
+    vec3 direction = VectorSub(mainFire->position, playerCamera->position);
+    direction.y = 0;
+    direction = Normalize(direction);
+
+
+
+    // if we would divide by zero, skip that rotation update.
+    if(direction.z != 0)
+    {
+        mainFire->rotation.y = atan(direction.x / direction.z);
+    }
 
     //mainFire->position.y = 3;
             //asin(DotProduct(Normalize(VectorSub(UP_VECTOR, playerCamera->position)), RIGHT_VECTOR));
-    //printf("%f \n",     mainFire->rotation.y);
+    //printf("%f \n",     DotProduct(direction, RIGHT_VECTOR));
 
     //////////////////////////////////////
     //          Buffer cleaning         //

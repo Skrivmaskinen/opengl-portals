@@ -13,9 +13,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mainFire.frag" beforeDir="false" afterPath="$PROJECT_DIR$/mainFire.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mainFire.vert" beforeDir="false" afterPath="$PROJECT_DIR$/mainFire.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phong.frag" beforeDir="false" afterPath="$PROJECT_DIR$/phong.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phong.vert" beforeDir="false" afterPath="$PROJECT_DIR$/phong.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/window.vert" beforeDir="false" afterPath="$PROJECT_DIR$/window.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,6 +138,7 @@
       <workItem from="1576572905467" duration="1212000" />
       <workItem from="1578565792458" duration="17107000" />
       <workItem from="1578645807850" duration="4316000" />
+      <workItem from="1578904031343" duration="9290000" />
     </task>
     <servers />
   </component>
@@ -144,9 +146,9 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1575902287423">
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1578908842517">
       <screen x="70" y="27" width="1850" height="1053" />
     </state>
-    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup/70.27.1850.1053@70.27.1850.1053" timestamp="1575902287423" />
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup/70.27.1850.1053@70.27.1850.1053" timestamp="1578908842517" />
   </component>
 </project>

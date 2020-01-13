@@ -7,6 +7,7 @@ in vec3 exNormal; // Phong
 in vec3 exSurface; // Phong (specular)
 in vec4 myPosition;
 in float out_time;
+in vec3 f_objectCenter;
 
 
 // --------------------------------------------------------------
@@ -134,12 +135,18 @@ float stage (float inValue, float steps)
 void main(void)
 {
     const vec3 midFire = vec3(0, 1.5, 0);
-    float x = exSurface.x;
-    float y = exSurface.y;
+    float x = exSurface.x - f_objectCenter.x;
+    float y = exSurface.y - f_objectCenter.y + 2.5;
+    float z = exSurface.z - f_objectCenter.z;
 
-    float intensity = snoise(vec3(x, 0.5*y - 2*out_time, 0)) + 0.5*snoise(vec3(2*x, y - 4*out_time, 0)) + 0.25*snoise(vec3(4*x, 2*y - 8*out_time, 0)); // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
 
+    float intensity =   snoise(vec3(x, 0.5*y - 2*out_time, z))*1.0;
+    intensity +=        snoise(vec3(2*x, y - 4*out_time, z))*0.5;
+    intensity +=        snoise(vec3(4*x, 2*y - 8*out_time, z))*0.25; // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
+
+    //intensity = 0;
     float x_dist        = max(0, (1 - 0.4*abs(x - midFire.x) ));
+    float z_dist        = max(0, (1 - 0.4*abs(z - midFire.z) ));
     float y_dist_up     = max(0, (1 - 0.1*abs(y - midFire.y) ));
     float y_dist_down   = max(0, (1 - 0.7*abs(y - midFire.y) ));
 
@@ -152,9 +159,7 @@ void main(void)
     {
         y_dist = y_dist_up;
     }
-    float drop_distance =  x_dist * y_dist;
-    float alt_dist = max( abs(0.5*x - 0.15*y),  abs(0.5*x + 0.15*y) ) ;
-    float inv_alt_dist = max(0, 1 - alt_dist);
+    float drop_distance =  x_dist * y_dist*z_dist;
 
     float out_value = drop_distance *(intensity*0.25 + 0.75);
 
@@ -163,6 +168,7 @@ void main(void)
 
     out_value = step(out_value, 0.3 + 0.3*wobble) + step(out_value, 0.5+ 0.15*wobble) + step(out_value, 0.4 + 0.3*wobble);
     out_value = out_value/3;
+
 
     if(out_value < 0.1)
     {
@@ -180,7 +186,6 @@ void main(void)
     {
         outColor = vec4(1, 0.9, 0.8, 1.0);
     }
-
     //outColor = vec4(out_value,out_value,out_value,  1.0);
     //outColor = vec4(out_Position, 1);
 }

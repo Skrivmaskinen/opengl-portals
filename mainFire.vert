@@ -4,6 +4,7 @@ uniform mat4 model2view;
 uniform mat4 projectionMatrix;
 uniform mat4 model2world;
 uniform float time;
+uniform vec3 objectCenter;
 
 in  vec3 in_Position;
 in  vec3 in_Normal;
@@ -11,6 +12,7 @@ out vec3 exNormal; // Phong
 out vec3 exSurface; // Phong (specular)
 out vec4 myPosition;
 out float out_time;
+out vec3 f_objectCenter;
 
 // --------------------------------------------------------------
 // Description : Array and textureless GLSL 2D/3D/4D simplex
@@ -119,6 +121,7 @@ float snoise(vec3 v)
 void main(void)
 {
 
+    f_objectCenter = objectCenter;
     out_time = time;
     exNormal = inverse(transpose(mat3(model2view))) * in_Normal; // Phong, "fake" normal transformation
 
