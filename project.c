@@ -513,14 +513,22 @@ void initGL()
     // shader info
     dumpInfo();
 
-    // GL inits
+    // Clear
     glClearColor(0.1, 0.1, 0.3, 0);
     glClearDepth(1.0);
+
+    // Color
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    // Culling and depth
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+
+    // Get alpha
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
     glBlendFunc(GL_ONE, GL_ZERO);
+
     printError("GL inits");
 }
 void initConstants()
@@ -569,10 +577,12 @@ void initModels()
 }
 
 SceneObject* mainFire;
+SceneObject* fireRoot;
 void initSceneObjects()
 {
     // The root of scene1
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
+    fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
@@ -597,7 +607,12 @@ void initSceneObjects()
     }
 
     // The flame in the bonfire.
-    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, NULL);
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, fireRoot);
+    mainFire->scaleV.x = 5;
+    mainFire->scaleV.z = 1;
+
+    mainFire = newSceneObject(cube, fire_shader, SetVector(5, 2.5, 0), 10, fireRoot);
+    mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
 
     playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
@@ -704,32 +719,34 @@ void display(void)
     /*          Object control          */
     //////////////////////////////////////
 
-    // rotate fire
-    vec3 direction = VectorSub(mainFire->position, playerCamera->position);
-    direction.y = 0;
-    direction = Normalize(direction);
 
-
-
-    // if we would divide by zero, skip that rotation update.
-    if(direction.z != 0)
+    // Rotate fires
+    SceneObject* current = fireRoot;
+    while(current->next != NULL)
     {
-        mainFire->rotation.y = atan(direction.x / direction.z);
-    }
+        current = current->next;
 
-    //mainFire->position.y = 3;
-            //asin(DotProduct(Normalize(VectorSub(UP_VECTOR, playerCamera->position)), RIGHT_VECTOR));
-    //printf("%f \n",     DotProduct(direction, RIGHT_VECTOR));
+        // rotate fire
+        vec3 direction = VectorSub(current->position, playerCamera->position);
+        direction.y = 0;
+        direction = Normalize(direction);
+
+        // if we would divide by zero, skip that rotation update.
+        if(direction.z != 0)
+        {
+            current->rotation.y = atan(direction.x / direction.z);
+        }
+    }
 
     //////////////////////////////////////
     //          Buffer cleaning         //
     //////////////////////////////////////
     // Sky box
     glClearColor(0.0, 0.0, 0.0, 0);
-    // Clear color-, depth-, and stencil-buffer.
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
+    // Clear color- and depth-buffer.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     // No transparency for objects
     glBlendFunc(GL_ONE, GL_ZERO);
     // Render the scene
@@ -737,7 +754,7 @@ void display(void)
 
     // Additive blending for fire
     glBlendFunc(GL_ONE, GL_ONE);
-    renderSceneObject(mainFire, playerCamera);
+    renderScene(fireRoot, playerCamera);
     //////////////////////////////////////
     //        End of render-loop        //
     //////////////////////////////////////

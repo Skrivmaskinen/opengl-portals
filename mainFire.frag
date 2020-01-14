@@ -9,6 +9,21 @@ in vec4 myPosition;
 in float out_time;
 in vec3 f_objectCenter;
 
+// --------------------------------------------------------------
+// aastep by mattdesl on github
+// https://github.com/glslify/glsl-aastep
+precision mediump float;
+
+#ifdef GL_OES_standard_derivatives
+#extension GL_OES_standard_derivatives : enable
+#endif
+
+// Anti-aliased step function.
+float aastep(float threshold, float value) {
+    float afwidth = length(vec2(dFdx(value), dFdy(value))) * 0.70710678118654757;
+    return smoothstep(threshold-afwidth, threshold+afwidth, value);
+
+}
 
 // --------------------------------------------------------------
 // Description : Array and textureless GLSL 2D/3D/4D simplex
@@ -134,18 +149,20 @@ float stage (float inValue, float steps)
 }
 void main(void)
 {
+    // The relative center of the fire.
     const vec3 midFire = vec3(0, 1.5, 0);
+
+    // Distance from the fire's center.
     float x = exSurface.x - f_objectCenter.x;
     float y = exSurface.y - f_objectCenter.y + 2.5;
     float z = exSurface.z - f_objectCenter.z;
 
-
     // Perlin noise that forms the base of th fire.
     // Flame patches are elongated along the y-axis by a factor of two.
     // The noise slides upwards to emulate the rising flames.
-    float flame_noise =   snoise(vec3(x, 0.5*y - 2*out_time, z))*1.0;
-    flame_noise +=        snoise(vec3(2*x, y - 4*out_time, z))*0.5;
-    flame_noise +=        snoise(vec3(4*x, 2*y - 8*out_time, z))*0.25; // + snoise(vec3(0.5*x + 20, 0.5*(y + 20 - out_time), 2*out_time));// + snoise(vec3(x, 2*(y - out_time), 2*out_time));
+    float flame_noise =   snoise(vec3(exSurface.x , 0.5*exSurface.y - 2*out_time, exSurface.z))*1.0;
+    flame_noise +=        snoise(vec3(2*x, exSurface.y - 4*out_time, exSurface.z))*0.5;
+    flame_noise +=        snoise(vec3(4*x, 2*exSurface.y - 8*out_time, exSurface.z))*0.25;
 
     // Create a "drop"-shape gradient.
     //  x
@@ -180,20 +197,21 @@ void main(void)
     // The transparency of the flame.
     float transparency = 0.5;
 
-    if(fire_intensity < 0.3 + 0.1*wobble)
-    {
-        discard;
-    }
-    else if(fire_intensity < 0.4 + 0.1*wobble)
-    {
-        outColor = vec4(1.0, 0.3, 0, transparency);
-    }
-    else if(fire_intensity < 0.5+ 0.1*wobble)
-    {
-        outColor = vec4(1, 0.60, 0, transparency);
-    }
-    else
-    {
-        outColor = vec4(1, 0.9, 0.8, transparency);
-    }
+    vec4 red        = vec4(1.0, 0.3, 0, transparency);
+    vec4 yellow     = vec4(1, 0.60, 0, transparency);
+    vec4 white      = vec4(1, 0.9, 0.8, transparency);
+
+    float mix;
+
+    outColor = vec4(0, 0, 0, 0);
+
+    mix = (1 - aastep(fire_intensity, 0.3 + 0.1*wobble))* aastep(fire_intensity, 0.4 + 0.1*wobble);
+    outColor = outColor + mix * red;
+
+    mix = (1 - aastep(fire_intensity, 0.4 + 0.1*wobble))* aastep(fire_intensity, 0.5 + 0.1*wobble);
+    outColor = outColor + mix * yellow;
+
+    mix = (1-aastep(fire_intensity, 0.5 + 0.1*wobble));
+    outColor = outColor + mix * white;
+    //outColor = vec4(1, 1, 1, 0.5);
 }

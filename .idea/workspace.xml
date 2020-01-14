@@ -12,10 +12,8 @@
     <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mainFire.frag" beforeDir="false" afterPath="$PROJECT_DIR$/mainFire.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/phong.frag" beforeDir="false" afterPath="$PROJECT_DIR$/phong.frag" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/window.frag" beforeDir="false" afterPath="$PROJECT_DIR$/window.frag" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +136,9 @@
       <workItem from="1578565792458" duration="17107000" />
       <workItem from="1578645807850" duration="4316000" />
       <workItem from="1578904031343" duration="9414000" />
-      <workItem from="1578922140382" duration="4410000" />
+      <workItem from="1578922140382" duration="5000000" />
+      <workItem from="1578994735718" duration="487000" />
+      <workItem from="1578996525421" duration="4379000" />
     </task>
     <servers />
   </component>
@@ -146,6 +146,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="616" y="235" width="748" height="644" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1578996852257">
+      <screen x="70" y="27" width="1850" height="1053" />
+    </state>
+    <state x="616" y="235" width="748" height="644" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/70.27.1850.1053@70.27.1850.1053" timestamp="1578996852257" />
     <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1578908842517">
       <screen x="70" y="27" width="1850" height="1053" />
     </state>
