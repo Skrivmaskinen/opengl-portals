@@ -187,6 +187,7 @@ float stage (float inValue, float steps)
 void main(void)
 {
 	const vec3 midFire = vec3(0, 1.5, 0);
+
 	float x = exSurface.x;
 	float y = exSurface.y;
 	float z = exSurface.z;
@@ -205,9 +206,6 @@ void main(void)
 	float fire_distance = sqrt((x-midFire.x)*(x-midFire.x) +(y-midFire.y)*(y-midFire.y) +(z-midFire.z)*(z-midFire.z));
 	fire_distance = fire_distance*0.75;
 
-	// Clamp
-	fire_distance = min(1, fire_distance);
-	fire_distance = max(0, fire_distance);
 
 	// Blend final color
 	outColor = vec4(char_color*(1-fire_distance) + wood_color*(fire_distance), 1.0);

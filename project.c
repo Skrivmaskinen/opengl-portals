@@ -584,6 +584,7 @@ void initSceneObjects()
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
+
     cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
@@ -606,25 +607,26 @@ void initSceneObjects()
         fire_log->rotation.z = PI/4*cos(log_radians);
     }
 
+
     // The flame in the bonfire.
     mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
-
+    /*
     mainFire = newSceneObject(cube, fire_shader, SetVector(5, 2.5, 0), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
-
+    */
     playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
 
 }
 void initCameras()
 {
-    // Initialize cameras
+    // Initialize camera
     cam = SetVector(0, 5, 15);
     teleCam = SetVector(0, 5, -15);
-    point = SetVector(0, 5, 0);
+    point = SetVector(0, 0, 0);
 
     playerCamera = newCamera(cam, point);
     surveillanceCamera = newCamera(teleCam, point);
