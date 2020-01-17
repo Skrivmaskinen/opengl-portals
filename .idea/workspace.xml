@@ -11,10 +11,32 @@
   <component name="ChangeListManager">
     <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/phong.frag" beforeDir="false" afterPath="$PROJECT_DIR$/phong.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blur.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/blur.vert" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/merge.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/merge.vert" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/phong.frag" beforeDir="false" afterPath="$PROJECT_DIR$/floor.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/phong.vert" beforeDir="false" afterPath="$PROJECT_DIR$/floor.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plain_white.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plain_white.vert" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plaintextureshader.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plaintextureshader.vert" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/window.frag" beforeDir="false" afterPath="$PROJECT_DIR$/window.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/._bilskissred.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/._conc.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/._dirt.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/._grass.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/._maskros512.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/bilskissred.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/conc.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/dirt.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/grass.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/textures/maskros512.tga" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/truncate.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/truncate.vert" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/window.frag" beforeDir="false" afterPath="$PROJECT_DIR$/wooden_log.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/window.vert" beforeDir="false" afterPath="$PROJECT_DIR$/wooden_log.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,6 +163,7 @@
       <workItem from="1578994735718" duration="487000" />
       <workItem from="1578996525421" duration="4379000" />
       <workItem from="1579163036402" duration="6735000" />
+      <workItem from="1579259641381" duration="1856000" />
     </task>
     <servers />
   </component>

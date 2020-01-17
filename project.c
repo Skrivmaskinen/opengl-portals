@@ -3,6 +3,7 @@
 // Switched to low-res Stanford Bunny for more details.
 // No HDR is implemented to begin with. That is your task.
 
+
 // You can compile like this:
 // gcc lab1-1.c ../common/*.c -lGL -o lab1-1 -I../common
 
@@ -74,10 +75,9 @@ void OnTimer(int value);
 ////////////////////////////////////////////////////////////////////////////////////
 
 Model* squareModel;
-Point3D cam, point, teleCam;
+Point3D cam, point;
 Model *model1, *cube, *teapot;
-FBOstruct *fbo1, *fbo2, *fbo_unfiltered, *fbo_finished, *fbo_screen1;
-GLuint plain_white_shader =0, phongshader = 0, plaintextureshader = 0, blur_shader = 0, truncate_shader = 0, merger_shader = 0, window_shader = 0, screen_shader = 0, fire_shader = 0;
+GLuint log_shader = 0, fire_shader = 0, floor_shader = 0;
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
@@ -127,10 +127,7 @@ struct Camera*      newCamera(vec3 inPosition, vec3 inTarget);
 struct SceneObject* newSceneObject(Model* inModel, GLuint inShader, vec3 inPosition, float inScale, SceneObject *root);
 
 void enlistSceneObject(SceneObject *root, SceneObject *newSceneObject);
-
-mat4 Rxyz(vec3 rotationVector);
 vec3 getRotationOfNormal(vec3 theVector, vec3 x_axis, vec3 y_axis);
-void getScreenAxis(SceneObject *this, vec3 *out_X, vec3 *out_Y);
 
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                Cameras                                         */
@@ -280,17 +277,6 @@ void enlistSceneObject(SceneObject *root, SceneObject *newSceneObject)
     root->next = newSceneObject;
 }
 
-void setRotation(SceneObject* in, float inX, float inY, float inZ)
-{
-    // in: the SceneObject to rotate
-    // inX, inY, inZ: new rotation
-    /////////////////////////////////////////
-
-    // Set the rotation
-    in->rotation = SetVector(inX, inY, inZ);
-}
-
-
 void renderSceneObject(SceneObject* in, Camera* activeCam)
 {
     // in: the SceneObject to render.
@@ -347,19 +333,6 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     //------------------------------------
 }
 
-void getScreenAxis(SceneObject *this, vec3 *out_X, vec3 *out_Y)
-{
-    vec3 X = MultVec3(Ry(this->rotation.y), RIGHT_VECTOR);
-    vec3 Y = MultVec3(Rx(this->rotation.x), UP_VECTOR);
-    X = MultVec3(Rz(this->rotation.z), X);
-    Y = MultVec3(Rz(this->rotation.z), Y);
-    X = ScalarMult(X, this->scaleV.x);
-    Y = ScalarMult(Y, this->scaleV.y);
-
-    *out_X = X;
-    *out_Y = Y;
-}
-
 // Render all scene objects connected to a scene.
 void renderScene(SceneObject *scene, Camera *activeCamera)
 {
@@ -397,7 +370,6 @@ int strafeRight = 0;
 // Remove?
 int currentCamID = 0;
 
-int show_blipp = 0;
 // Key is pressed
 void KeyDown(unsigned char key,
              __attribute__((unused)) int x,
@@ -405,13 +377,6 @@ void KeyDown(unsigned char key,
 {
     switch (key)
     {
-        // Arbitrary toggle, use when needed
-        case 'v':
-            show_blipp = 1;
-            break;
-        case 'c':
-            show_blipp = 0;
-            break;
 
         // Movement forward and backward
         case 'w':
@@ -542,38 +507,21 @@ void initConstants()
 void initShaders()
 {
     // Load and compile shaders initShader
-    plaintextureshader  = loadShaders("plaintextureshader.vert", "plaintextureshader.frag");  // puts texture on teapot
-    phongshader         = loadShaders("phong.vert", "phong.frag");  // renders with light (used for initial renderin of teapot)
-    blur_shader         = loadShaders("blur.vert", "blur.frag"); // Low pass filter
-    truncate_shader     = loadShaders("truncate.vert", "truncate.frag"); // Get the overexponated part of the image
-    merger_shader       = loadShaders("merge.vert", "merge.frag"); //Combine two FBOs to a singe output
-    window_shader       = loadShaders("window.vert", "window.frag");
-    screen_shader       = loadShaders("screen.vert", "screen.frag");
-    plain_white_shader  = loadShaders("plain_white.vert", "plain_white.frag");
-    fire_shader         = loadShaders("mainFire.vert", "mainFire.frag");
+    floor_shader    = loadShaders("floor.vert", "floor.frag");  // renders with light (used for initial renderin of teapot)
+    log_shader      = loadShaders("wooden_log.vert", "wooden_log.frag");
+    fire_shader     = loadShaders("mainFire.vert", "mainFire.frag");
     printError("init shader");
 
-}
-void initFBOs()
-{
-    // Initialize FBOs
-    fbo1 = initFBO(W, H, 0);
-    fbo2 = initFBO(W, H, 0);
-    fbo_unfiltered = initFBO(W, H, 0);
-    fbo_finished = initFBO(W, H, 0);
-    fbo_screen1 = initFBO(W, H, 0);
 }
 void initModels()
 {
     // Load models
-    //model1 = LoadModelPlus("teapot.obj");
-    model1 = LoadModelPlus("stanford-bunny.obj");
     cube = LoadModelPlus("objects/cubeplus.obj");
-    teapot = LoadModelPlus("objects/teapot.obj");
-
-    squareModel = LoadDataToModel(
+    /*
+     squareModel = LoadDataToModel(
             square, NULL, squareTexCoord, NULL,
             squareIndices, 4, 6);
+    */
 }
 
 SceneObject* mainFire;
@@ -585,7 +533,7 @@ void initSceneObjects()
     fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
 
-    cubeFloorObject = newSceneObject(cube, window_shader, SetVector(0, -1, 0), 100, scene1Root);
+    cubeFloorObject = newSceneObject(cube, log_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
     // The number of logs around the fire.
@@ -596,7 +544,7 @@ void initSceneObjects()
         float log_radians = 2*PI*i/count_logs;
         //printf("%f \n",log_radians);
         // Create a log sceneobject and add it to the scene1root. Position 1 unit away from fire at log_radians angle.
-        SceneObject* fire_log = newSceneObject(cube, phongshader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
+        SceneObject* fire_log = newSceneObject(cube, floor_shader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
         // Make the log a thin line
         fire_log->scaleV.y = 0.5;
         fire_log->scaleV.x = 0.5;
@@ -617,7 +565,7 @@ void initSceneObjects()
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
     */
-    playerObject = newSceneObject(cube, phongshader, SetVector(0, 5, 15), 1, scene1Root);
+    playerObject = newSceneObject(cube, floor_shader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
 
 }
@@ -625,11 +573,9 @@ void initCameras()
 {
     // Initialize camera
     cam = SetVector(0, 5, 15);
-    teleCam = SetVector(0, 5, -15);
     point = SetVector(0, 0, 0);
-
     playerCamera = newCamera(cam, point);
-    surveillanceCamera = newCamera(teleCam, point);
+
 }
 
 void init(void)
@@ -638,7 +584,6 @@ void init(void)
     initGL();
     initConstants();
     initShaders();
-    initFBOs();
     initModels();
     initSceneObjects();
     initCameras();
@@ -655,33 +600,6 @@ void OnTimer(int value)
 	glutPostRedisplay();
 	glutTimerFunc(5, &OnTimer, value);
 }
-
-vec3 getRotationOfNormal(vec3 theVector, vec3 x_axis, vec3 y_axis)
-{
-    // Normalize the axix
-    theVector = Normalize(theVector);
-    x_axis = Normalize(x_axis);
-    y_axis = Normalize(y_axis);
-
-    // Get the radian angle of the tilt
-    vec3 outRadians;
-    outRadians.x = asin(DotProduct(theVector, y_axis));
-    outRadians.y = asin(DotProduct(theVector, x_axis));
-    outRadians.z = 0;
-
-    return outRadians;
-}
-
-// Rotation in xyz directions
-mat4 Rxyz(vec3 rotationVector)
-{
-    mat4 rotX = Rx(rotationVector.x);
-    mat4 rotY = Ry(rotationVector.y);
-    mat4 rotZ = Rz(rotationVector.z);
-
-    return Mult(rotX, Mult(rotY, rotZ));
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////
 /*                          Callback functions                                    */
@@ -709,7 +627,7 @@ void display(void)
 
     // Update players targetOffset.
     playerCamera->targetOffset = VectorSub(playerCamera->target, playerCamera->position);
-    surveillanceCamera->targetOffset = VectorSub(surveillanceCamera->target, surveillanceCamera->position);
+
 
     // Move the players body. TODO: Maybe should be other way around but works for now.
     playerObject->position = playerCamera->position;
@@ -787,7 +705,7 @@ int main(int argc, char *argv[])
 	glutInitWindowSize(W, H);
 
 	glutInitContextVersion(3, 2);
-	glutCreateWindow ("Alexs' awesome portals");
+	glutCreateWindow ("Procedural Campfire");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
@@ -800,229 +718,3 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 	exit(0);
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////
-/*                                  The Dump                                      */
-////////////////////////////////////////////////////////////////////////////////////
-
-/* // Replace fragment with '1' when drawn to.
-glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF); // GL_ Initially the stencil test is disabled. If there is no stencil buffer, no stencil modification can occur and it is as if the stencil test always passes. ALWAYS (ingmar)
-glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // GL_REPLACE (ingmar)
-
-// Render opening object to stencil.
-renderSceneObject(openingObject, playerCamera);
-
-//////////////////////////////////////
-//       Render portal-view         //
-//////////////////////////////////////
-// Turn on the color and depth buffer to allow normal rendering.
-glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-glDepthMask(GL_TRUE);
-
-// Don't throw away stencil. We will probably render several objects in with the same stencil.
-glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-// Render where stencil == 1
-glStencilFunc(GL_EQUAL, 1, 0xFFFFFFFF);
-
-// Render scene 1 with surveillanceCamera
-renderScene(scene1Root, surveillanceCamera);
-
-//////////////////////////////////////
-//      Block portal from player    // Idea from: https://en.wikibooks.org/wiki/OpenGL_Programming/Mini-Portal#Clipping_the_portal_scene_-_stencil_buffer
-//////////////////////////////////////
-// Disable colour
-glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-// Enable depth
-glDepthMask(GL_TRUE);
-// Disable stencil-test
-glDisable(GL_STENCIL_TEST);
-
-// openingObject is rendered to only the depth buffer, blocking new renders behind the portal
-renderSceneObject(openingObject, playerCamera);
-
-//////////////////////////////////////
-//        Draw player view          //
-//////////////////////////////////////
-// Enable rendering to color-buffer
-glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-// Render the scene
-renderScene(scene1Root, playerCamera);*/
-
-/*
-
-// Convert playerCameras position into local coordinates
-vec3 localPlayerCoords = global2local(screenCoords, openingObject->position, playerCamera->position);
-surveillanceCamera->positionOffset = VectorSub(local2global(recorderCoords, surveillanceCamera->position, localPlayerCoords), surveillanceCamera->position);
-
-vec3 localPlayerTargetCoords = global2local(screenCoords, openingObject->position, playerCamera->target);
-surveillanceCamera->targetOffset = VectorSub(local2global(recorderCoords, surveillanceCamera->position, localPlayerTargetCoords), surveillanceCamera->position);
-
-*/
-/**/
-//vec3 newPos = VectorAdd(SetVector(3*sin(time/2), 0, 0),  cam);
-//rotateCamera(surveillanceCamera, dTime);
-//updateFOV(surveillanceCamera, playerCamera, screenObject);
-
-/* -----BUNNY-----
-// Activate shader program
-glUseProgram(phongshader);
-
-vm2 = viewMatrix;
-// Scale and place bunny since it is too small
-vm2 = Mult(vm2, T(0, -8.5, 0));
-vm2 = Mult(vm2, S(80,80,80));
-
-glUniformMatrix4fv(glGetUniformLocation(phongshader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix.m);
-glUniformMatrix4fv(glGetUniformLocation(phongshader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-glUniform3fv(glGetUniformLocation(phongshader, "camPos"), 1, &cam.x);
-glUniform1i(glGetUniformLocation(phongshader, "texUnit"), 0);
-
-// Enable Z-buffering
-glEnable(GL_DEPTH_TEST);
-// Enable backface culling
-glEnable(GL_CULL_FACE);
-glCullFace(GL_BACK);
-
-DrawModel(model1, phongshader, "in_Position", "in_Normal", NULL);
-
-*/
-/*
-//setCameraPosition(playerCamera, &newPos);
-// Render scene ----------------------------------------------------------
-Camera * currentCam;
-if(currentCamID == 1)
-{
-    currentCam = surveillanceCamera;
-}
-else
-{
-    currentCam = playerCamera;
-}
-
-renderSceneObject(bunnyObject, currentCam);
-renderSceneObject(cubeFloorObject, currentCam);
-*/
-
-//glActiveTexture(GL_TEXTURE0);
-//glBindTexture(GL_TEXTURE_2D, fbo_screen1);
-//renderSceneObject(screenObject, playerCamera);
-
-
-// render to fbo_unfiltered with fbo_screen1 as texture.
-//useFBO(fbo_unfiltered, fbo_screen1, 0L);
-
-// Done rendering the FBO! Set up for rendering on screen, using the result as texture!
-//////////////////////////////////////
-/*          Blooming                */
-//////////////////////////////////////
-/*
-// Truncate fbo_unfiltered and put inside fbo1
-runFilter(truncate_shader, fbo_unfiltered, 0L, fbo1);
-
-// MEGABLUR fbo1 ping-ponging between fbo1 and fbo2
-for (int i = 0; i < 10; ++i)
-{
-    runFilter(blur_shader, fbo1, 0L, fbo2);
-    runFilter(blur_shader, fbo2, 0L, fbo1);
-}
-
-runFilter(merger_shader, fbo1, fbo_unfiltered, fbo_finished);
-*/
-//////////////////////////////////////
-/*          Render to screen        */
-//////////////////////////////////////
-/*
-//renderSceneObject(screenObject, playerCamera);
-// Final output that is shown on screen
-renderSceneObject(visionObject, playerCamera);
-*/
-/*
-//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
-useFBO(0L, fbo_finished, 0L);
-glClearColor(0.0, 0.0, 0.0, 0);
-glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-// Activate second shader program
-glUseProgram(plaintextureshader);
-
-glDisable(GL_CULL_FACE);
-glDisable(GL_DEPTH_TEST);
-DrawModel(squareModel, plaintextureshader, "in_Position", NULL, "in_TexCoord");
-*/
-
-// Render scene
-//renderSceneObject(bunnyObject, surveillanceCamera);
-//renderSceneObject(cubeFloorObject, surveillanceCamera);
-
-/*
-// render from surveillanceCamera to fbo_screen1
-useFBO(fbo_screen1, 0L, 0L);
-
-// Clear fbo
-glClearColor(0.4, 0.1, 0.3, 0);
-glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-*/
-/*
- void GetCameraAxis(Camera *this, vec3 *out_X, vec3 *out_Y )
-{
-vec3 z_axis = Normalize(VectorSub(this->target, this->position));
-float radians_x;
-*out_Y = MultVec3(Rx(1), z_axis);
-}
-*/
-
-
-/*
-    // Reset stencil
-    glClear(GL_STENCIL_BUFFER_BIT);
-
-    // Enable stencil
-    glEnable(GL_STENCIL_TEST);
-
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glDepthMask(GL_FALSE);
-
-    // Replace fragment with '1' when drawn to.
-    glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF); // GL_ Initially the stencil test is disabled. If there is no stencil buffer, no stencil modification can occur and it is as if the stencil test always passes. ALWAYS (ingmar)
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // GL_REPLACE (ingmar)
-
-    renderSceneObject(openingObject, playerCamera);
-
-    // Replace fragment with '0' when drawn to.
-    glStencilFunc(GL_ALWAYS, 1, 0xFFFFFFFF); // GL_ALWAYS (ingmar)
-    glStencilOp(GL_ZERO, GL_REPLACE, GL_ZERO);
-
-    renderSceneObject(bunnyObject, playerCamera);
-    //renderSceneObject(cubeFloorObject, playerCamera);
-
-    // Turn on the color and depth buffer to allow normal rendering.
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDepthMask(GL_TRUE);
-
-    // Don't throw away stencil. We will probably render several objects in with the same stencil.
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-    //////////////////////////////////////
-    //          Player camera           //
-    //////////////////////////////////////
-    // Only write to framebuffer if stencil buffer equals 0.
-    glStencilFunc(GL_EQUAL, 0, 0xFFFFFFFF);
-
-    // Render scene 1 with playerCamera
-    renderScene(scene1Root, playerCamera);
-
-    //////////////////////////////////////
-    //         Surveillance camera      //
-    //////////////////////////////////////
-
-    // Only write to framebuffer if stencil buffer equals 1.
-    glStencilFunc(GL_EQUAL, 1, 0xFFFFFFFF);
-
-    // Render scene 1 with surveillanceCamera
-    renderScene(scene1Root, surveillanceCamera);
-
-    glDisable(GL_STENCIL_TEST);
-    */
