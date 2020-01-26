@@ -74,6 +74,7 @@ void OnTimer(int value);
 /*                              Globals                                           */
 ////////////////////////////////////////////////////////////////////////////////////
 
+vec3 ambientLightColor;
 Model* squareModel;
 Point3D cam, point;
 Model *model1, *cube, *teapot;
@@ -503,6 +504,8 @@ void initConstants()
     RIGHT_VECTOR = SetVector(1, 0, 0);
     FRONT_VECTOR = SetVector(0, 0, 1);
     ZERO_VECTOR = SetVector(0, 0, 0);
+
+    ambientLightColor = SetVector(0, 0, 0.1);
 }
 void initShaders()
 {
@@ -662,7 +665,7 @@ void display(void)
     //          Buffer cleaning         //
     //////////////////////////////////////
     // Sky box
-    glClearColor(0.0, 0.0, 0.0, 0);
+    glClearColor(ambientLightColor.x, ambientLightColor.y, ambientLightColor.z, 0);
 
     // Clear color- and depth-buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
