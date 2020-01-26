@@ -78,7 +78,7 @@ vec3 ambientLightColor;
 Model* squareModel;
 Point3D cam, point;
 Model *model1, *cube, *teapot;
-GLuint log_shader = 0, fire_shader = 0, floor_shader = 0;
+GLuint ground_shader = 0, fire_shader = 0, log_shader = 0;
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
@@ -510,8 +510,8 @@ void initConstants()
 void initShaders()
 {
     // Load and compile shaders initShader
-    floor_shader    = loadShaders("floor.vert", "floor.frag");  // renders with light (used for initial renderin of teapot)
-    log_shader      = loadShaders("wooden_log.vert", "wooden_log.frag");
+    log_shader    = loadShaders("log.vert", "log.frag");  // renders with light (used for initial renderin of teapot)
+    ground_shader      = loadShaders("ground.vert", "ground.frag");
     fire_shader     = loadShaders("mainFire.vert", "mainFire.frag");
     printError("init shader");
 
@@ -536,7 +536,7 @@ void initSceneObjects()
     fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
 
-    cubeFloorObject = newSceneObject(cube, log_shader, SetVector(0, -1, 0), 100, scene1Root);
+    cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
     // The number of logs around the fire.
@@ -547,7 +547,7 @@ void initSceneObjects()
         float log_radians = 2*PI*i/count_logs;
         //printf("%f \n",log_radians);
         // Create a log sceneobject and add it to the scene1root. Position 1 unit away from fire at log_radians angle.
-        SceneObject* fire_log = newSceneObject(cube, floor_shader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
+        SceneObject* fire_log = newSceneObject(cube, log_shader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
         // Make the log a thin line
         fire_log->scaleV.y = 0.5;
         fire_log->scaleV.x = 0.5;
@@ -568,7 +568,7 @@ void initSceneObjects()
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
     */
-    playerObject = newSceneObject(cube, floor_shader, SetVector(0, 5, 15), 1, scene1Root);
+    playerObject = newSceneObject(cube, log_shader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
 
 }

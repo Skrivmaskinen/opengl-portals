@@ -11,7 +11,12 @@
   <component name="ChangeListManager">
     <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/floor.frag" beforeDir="false" afterPath="$PROJECT_DIR$/log.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/floor.vert" beforeDir="false" afterPath="$PROJECT_DIR$/log.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wooden_log.frag" beforeDir="false" afterPath="$PROJECT_DIR$/ground.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wooden_log.vert" beforeDir="false" afterPath="$PROJECT_DIR$/ground.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
