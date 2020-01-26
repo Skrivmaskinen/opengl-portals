@@ -7,6 +7,7 @@
 // coordinates, which means that it will follow the camera.
 // You usually give light sources in world coordinates.
 
+uniform vec3 ambientColor;
 out vec4 outColor;
 in vec3 exNormal; // Phong
 in vec3 exSurface; // Phong (specular)
@@ -88,13 +89,13 @@ float snoise(vec2 v)
 void main(void)
 {
     const vec3 light = vec3(0, 0.7, 0);
-    vec3 normal = vec3(0, 1, 0);
+    vec3 normal = exNormal;
 
     vec3 color = vec3(1, 0.60, 0);
     vec3 lightDirection = normalize(light - exSurface);
-    float intensity = abs(dot(lightDirection, normal));
+    float intensity = max(0, dot(lightDirection, normal));
     float wobbel = snoise(vec2(0, 7*out_time));
-    outColor = vec4(color*intensity*(1 + wobbel*0.2), 1);
+    outColor = vec4(color*intensity*(1 + wobbel*0.2) + ambientColor, 1);
 
     //outColor = vec4(exNormal, 1);
 }

@@ -16,7 +16,7 @@ void main(void)
 {
 
     out_time = time;
-    exNormal = inverse(transpose(mat3(model2view))) * in_Normal; // Phong, "fake" normal transformation
+    exNormal = in_Normal; //inverse(transpose(mat3(model2view))) * in_Normal; // Phong, "fake" normal transformation
 
     exSurface = vec3(model2world * vec4(in_Position, 1.0)); // Don't include projection here - we only want to go to view coordinates
     myPosition = vec4(in_Position, 1.0);

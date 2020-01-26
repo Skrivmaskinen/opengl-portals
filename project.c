@@ -316,10 +316,20 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     glUniformMatrix4fv(glGetUniformLocation(in->shader, "projectionMatrix"), 1, GL_TRUE, activeCam->projectionMatrix.m);
     glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2view"), 1, GL_TRUE, model2view.m);
     glUniformMatrix4fv(glGetUniformLocation(in->shader, "model2world"), 1, GL_TRUE, model2world.m);
-    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint"), 1, &(UP_VECTOR.x));
     glUniform3fv(glGetUniformLocation(in->shader, "objectCenter"), 1, &(in->position.x));
     glUniform3fv(glGetUniformLocation(in->shader, "camPos"), 1, &(activeCam->position.x) );
     glUniform1i(glGetUniformLocation(in->shader, "texUnit"), 0);
+
+
+    // Lighting
+
+    glUniform3fv(glGetUniformLocation(in->shader, "ambientColor"), 1, &(ambientLightColor.x));
+
+    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint1"), 1, &(ZERO_VECTOR.x));
+    glUniform3fv(glGetUniformLocation(in->shader, "lightColor1"), 1, &(ZERO_VECTOR.x));
+
+    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint2"), 1, &(ZERO_VECTOR.x));
+    glUniform3fv(glGetUniformLocation(in->shader, "lightColor2"), 1, &(ZERO_VECTOR.x));
     //------------------------------------
 
     // <<Set options>>
@@ -505,14 +515,14 @@ void initConstants()
     FRONT_VECTOR = SetVector(0, 0, 1);
     ZERO_VECTOR = SetVector(0, 0, 0);
 
-    ambientLightColor = SetVector(0, 0, 0.1);
+    ambientLightColor = SetVector(0, 0, 0.05);
 }
 void initShaders()
 {
     // Load and compile shaders initShader
     log_shader    = loadShaders("log.vert", "log.frag");  // renders with light (used for initial renderin of teapot)
-    ground_shader      = loadShaders("ground.vert", "ground.frag");
-    fire_shader     = loadShaders("mainFire.vert", "mainFire.frag");
+    ground_shader = loadShaders("ground.vert", "ground.frag");
+    fire_shader   = loadShaders("mainFire.vert", "mainFire.frag");
     printError("init shader");
 
 }
@@ -538,6 +548,9 @@ void initSceneObjects()
 
     cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
+
+    cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(9, 1.5, 0), 3, scene1Root);
+
 
     // The number of logs around the fire.
     int count_logs = 10;

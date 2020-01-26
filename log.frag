@@ -1,6 +1,7 @@
 #version 150
 
 // Inspiration from https://www.shadertoy.com/view/lsscWr
+uniform vec3 ambientColor;
 
 out vec4 outColor;
 in vec3 exNormal; // Phong
@@ -208,7 +209,7 @@ void main(void)
 
 
 	// Blend final color
-	outColor = vec4(char_color*(1-fire_distance) + wood_color*(fire_distance), 1.0);
+	outColor = vec4(char_color*(1-fire_distance) + wood_color*(fire_distance) + ambientColor, 1.0);
 	 //outColor = vec4(crack_flow, crack_flow, crack_flow, 1);//crack_flow
 
 }
