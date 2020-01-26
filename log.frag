@@ -201,9 +201,6 @@ void main(void)
 	vec3 char_color = vec3(1, 0.60, 0)*fire_cracks;//vec4(fire_cracks, 0, 0, 1);
 	vec3 wood_color = vec3(0.1, 0.05, 0);//*(1 + 0.2*snoise(x, y, z));
 
-
-
-
 	float fire_distance = sqrt((x-midFire.x)*(x-midFire.x) +(y-midFire.y)*(y-midFire.y) +(z-midFire.z)*(z-midFire.z));
 	fire_distance = fire_distance*0.75;
 

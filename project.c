@@ -78,7 +78,7 @@ vec3 ambientLightColor;
 Model* squareModel;
 Point3D cam, point;
 Model *model1, *cube, *teapot;
-GLuint ground_shader = 0, fire_shader = 0, log_shader = 0;
+GLuint ground_shader = 0, fire_shader = 0, log_shader = 0, shadow_shader = 0;
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
@@ -523,6 +523,7 @@ void initShaders()
     log_shader    = loadShaders("log.vert", "log.frag");  // renders with light (used for initial renderin of teapot)
     ground_shader = loadShaders("ground.vert", "ground.frag");
     fire_shader   = loadShaders("mainFire.vert", "mainFire.frag");
+    shadow_shader = loadShaders("shadow.vert", "shadow.frag");
     printError("init shader");
 
 }
@@ -545,6 +546,10 @@ void initSceneObjects()
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
+
+    cubeFloorObject = newSceneObject(cube, shadow_shader, SetVector(0, 0, 0), 9, scene1Root);
+    cubeFloorObject->scaleV.y = 0.1;
+
 
     cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 100, scene1Root);
     cubeFloorObject->scaleV.y = 1;
@@ -583,6 +588,7 @@ void initSceneObjects()
     */
     playerObject = newSceneObject(cube, log_shader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
+
 
 }
 void initCameras()
@@ -683,8 +689,10 @@ void display(void)
     // Clear color- and depth-buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // No transparency for objects
-    glBlendFunc(GL_ONE, GL_ZERO);
+    // No additive blending for objects// Enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_ONE, GL_ZERO);
     // Render the scene
     renderScene(scene1Root, playerCamera);
 
