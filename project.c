@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "perlin_noise.h"
 #ifdef __APPLE__
 // Mac
 	#include <OpenGL/gl3.h>
@@ -79,6 +80,13 @@ Model* squareModel;
 Point3D cam, point;
 Model *model1, *cube, *teapot;
 GLuint ground_shader = 0, fire_shader = 0, log_shader = 0, shadow_shader = 0;
+
+
+// floats
+float fireIntensity1 = 0;
+float fireIntensity2 = 0;
+float fireIntensity3 = 0;
+
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
@@ -120,6 +128,7 @@ typedef struct SceneObject
 
 }SceneObject, *SceneObjectPtr;
 
+SceneObject* fireRoot;
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                Header                                          */
 ////////////////////////////////////////////////////////////////////////////////////
@@ -324,6 +333,15 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     // Lighting
 
     glUniform3fv(glGetUniformLocation(in->shader, "ambientColor"), 1, &(ambientLightColor.x));
+
+    SceneObject * currentFire = fireRoot;
+    while(currentFire->next != NULL)
+    {
+        // Advance in list
+        currentFire = currentFire->next;
+
+    }
+    //
 
     glUniform3fv(glGetUniformLocation(in->shader, "lightPoint1"), 1, &(ZERO_VECTOR.x));
     glUniform3fv(glGetUniformLocation(in->shader, "lightColor1"), 1, &(ZERO_VECTOR.x));
@@ -539,7 +557,6 @@ void initModels()
 }
 
 SceneObject* mainFire;
-SceneObject* fireRoot;
 void initSceneObjects()
 {
     // The root of scene1
@@ -640,6 +657,9 @@ void display(void)
     time = time + dTime;
     //printf("Time:%f\n", time );
 
+    // Colour of the sky.
+    //ambientLightColor = ScalarMult( SetVector(0.2, 0.2, 0.5), perlin2d(time, time, 1, 1));
+    //printf("%f\n", perlin2d(time, time, 1, 1));
     //////////////////////////////////////
     /*          Camera control          */
     //////////////////////////////////////
@@ -660,6 +680,7 @@ void display(void)
     //////////////////////////////////////
     /*          Object control          */
     //////////////////////////////////////
+
 
 
     // Rotate fires

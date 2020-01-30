@@ -10,13 +10,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6930a739-463a-43b4-ab03-6eaf6f9635eb" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/perlin_noise.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/perlin_noise.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ground.frag" beforeDir="false" afterPath="$PROJECT_DIR$/ground.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log.frag" beforeDir="false" afterPath="$PROJECT_DIR$/log.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project" beforeDir="false" afterPath="$PROJECT_DIR$/project" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project.c" beforeDir="false" afterPath="$PROJECT_DIR$/project.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shadow.frag" beforeDir="false" afterPath="$PROJECT_DIR$/shadow.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shadow.vert" beforeDir="false" afterPath="$PROJECT_DIR$/shadow.vert" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,6 +146,7 @@
       <workItem from="1578996525421" duration="4379000" />
       <workItem from="1579163036402" duration="6735000" />
       <workItem from="1579259641381" duration="1856000" />
+      <workItem from="1580375146942" duration="2888000" />
     </task>
     <servers />
   </component>
@@ -158,9 +158,9 @@
       <screen x="70" y="27" width="1850" height="1053" />
     </state>
     <state x="616" y="235" width="748" height="644" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/70.27.1850.1053@70.27.1850.1053" timestamp="1578996852257" />
-    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1580060475678">
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1580376222843">
       <screen x="70" y="27" width="1850" height="1053" />
     </state>
-    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup/70.27.1850.1053@70.27.1850.1053" timestamp="1580060475678" />
+    <state x="658" y="259" width="672" height="678" key="search.everywhere.popup/70.27.1850.1053@70.27.1850.1053" timestamp="1580376222843" />
   </component>
 </project>
