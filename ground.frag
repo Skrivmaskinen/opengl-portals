@@ -8,6 +8,15 @@
 // You usually give light sources in world coordinates.
 
 uniform vec3 ambientColor;
+
+uniform vec3 lightPoint1;
+uniform vec3 lightPoint2;
+uniform vec3 lightPoint3;
+
+uniform vec3 lightColor1;
+uniform vec3 lightColor2;
+uniform vec3 lightColor3;
+
 out vec4 outColor;
 in vec3 exNormal; // Phong
 in vec3 exSurface; // Phong (specular)
@@ -88,13 +97,25 @@ float snoise(vec2 v)
 
 void main(void)
 {
-    const vec3 light = vec3(0, 0.7, 0);
+    // Init
+    vec3 combined_color = ambientColor;
 
-    vec3 color = vec3(1, 0.60, 0);
-    vec3 lightDirection = normalize(light - exSurface);
+    // Light 1
+    vec3 lightDirection = normalize(lightPoint1 - exSurface);
     float intensity = max(0, dot(lightDirection, exNormal));
-    float wobbel = snoise(vec2(0, 7*out_time));
-    outColor = vec4(color*intensity*(1 + wobbel*0.2) + ambientColor, 1);
+    combined_color = combined_color + intensity*lightColor1;
+
+    // Light 2
+    lightDirection = normalize(lightPoint2 - exSurface);
+    intensity = max(0, dot(lightDirection, exNormal));
+    combined_color = combined_color + intensity*lightColor2;
+    /*
+        // Light 3
+        vec3 lightDirection = normalize(lightPoint3 - exSurface);
+        float intensity = max(0, dot(lightDirection, exNormal));
+        combined_color = combined_color + intensity*lightColor3;
+     */
+    outColor = vec4(combined_color, 1);
 
     //outColor = vec4(exNormal, 1);
 }

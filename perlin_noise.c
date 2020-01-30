@@ -61,8 +61,8 @@ float perlin2d(float x, float y, float freq, int depth)
      * int depth : makes the noise anxious. Set equal to or larger than 1.
      * */
     //////////////////////////////////////
-    float xa = x*freq;
-    float ya = y*freq;
+    float xa = x*freq * (x<0?-1:1);
+    float ya = y*freq * (y<0?-1:1);
     float amp = 1.0;
     float fin = 0;
     float div = 0.0;

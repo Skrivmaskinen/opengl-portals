@@ -76,16 +76,12 @@ void OnTimer(int value);
 ////////////////////////////////////////////////////////////////////////////////////
 
 vec3 ambientLightColor;
+vec3 flameIllumination;
 Model* squareModel;
 Point3D cam, point;
 Model *model1, *cube, *teapot;
 GLuint ground_shader = 0, fire_shader = 0, log_shader = 0, shadow_shader = 0;
 
-
-// floats
-float fireIntensity1 = 0;
-float fireIntensity2 = 0;
-float fireIntensity3 = 0;
 
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
@@ -335,19 +331,36 @@ void renderSceneObject(SceneObject* in, Camera* activeCam)
     glUniform3fv(glGetUniformLocation(in->shader, "ambientColor"), 1, &(ambientLightColor.x));
 
     SceneObject * currentFire = fireRoot;
+    int count = 0;
     while(currentFire->next != NULL)
     {
         // Advance in list
         currentFire = currentFire->next;
+        count = count + 1;
+
+        char pointName[40];
+        char colorName[40];
+        sprintf(pointName, "lightPoint%d", count);
+        glUniform3fv(glGetUniformLocation(in->shader, pointName), 1, &(currentFire->position.x));
+
+        vec3 flame = ScalarMult(flameIllumination, 0.5 + 0.5*perlin2d(currentFire->position.x + time, currentFire->position.y + time,10, 1));
+
+        sprintf(colorName, "lightColor%d", count);
+        glUniform3fv(glGetUniformLocation(in->shader, colorName), 1, &(flame.x));
+    }
+    while(count < 3)
+    {
+        count = count + 1;
+
+        char pointName[80];
+        char colorName[80];
+        sprintf(pointName, "lightPoint%d", count);
+        glUniform3fv(glGetUniformLocation(in->shader, pointName), 1, &(ZERO_VECTOR.x));
+
+        sprintf(colorName, "lightColor%d", count);
+        glUniform3fv(glGetUniformLocation(in->shader, colorName), 1, &(ZERO_VECTOR.x));
 
     }
-    //
-
-    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint1"), 1, &(ZERO_VECTOR.x));
-    glUniform3fv(glGetUniformLocation(in->shader, "lightColor1"), 1, &(ZERO_VECTOR.x));
-
-    glUniform3fv(glGetUniformLocation(in->shader, "lightPoint2"), 1, &(ZERO_VECTOR.x));
-    glUniform3fv(glGetUniformLocation(in->shader, "lightColor2"), 1, &(ZERO_VECTOR.x));
     //------------------------------------
 
     // <<Set options>>
@@ -534,6 +547,7 @@ void initConstants()
     ZERO_VECTOR = SetVector(0, 0, 0);
 
     ambientLightColor = SetVector(0, 0, 0.05);
+    flameIllumination = SetVector(1, 0.60, 0);
 }
 void initShaders()
 {
@@ -557,6 +571,8 @@ void initModels()
 }
 
 SceneObject* mainFire;
+
+
 void initSceneObjects()
 {
     // The root of scene1
@@ -566,9 +582,11 @@ void initSceneObjects()
 
     cubeFloorObject = newSceneObject(cube, shadow_shader, SetVector(0, 0, 0), 9, scene1Root);
     cubeFloorObject->scaleV.y = 0.1;
+    cubeFloorObject = newSceneObject(cube, shadow_shader, SetVector(-25, 0, -10), 9, scene1Root);
+    cubeFloorObject->scaleV.y = 0.1;
 
 
-    cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 100, scene1Root);
+    cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 500, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
     cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(9, 1.5, 0), 3, scene1Root);
@@ -598,11 +616,11 @@ void initSceneObjects()
     mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
-    /*
-    mainFire = newSceneObject(cube, fire_shader, SetVector(5, 2.5, 0), 10, fireRoot);
+
+    mainFire = newSceneObject(cube, fire_shader, SetVector(-25, 2.5, -10), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
-    */
+
     playerObject = newSceneObject(cube, log_shader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
 
