@@ -86,7 +86,7 @@ GLuint ground_shader = 0, fire_shader = 0, log_shader = 0, shadow_shader = 0;
 // --------------------Scene object globals------------------------------------------
 struct SceneObject *bunnyObject, *cubeFloorObject, *screenObject,
         *visionObject, *openingObject, *openingFrameObject, *playerObject,
-        *smallBunnyObject, *smallerBunnyObject, *scene1Root;
+        *smallBunnyObject, *smallerBunnyObject, *scene1Root, *particleRoot;
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +123,14 @@ typedef struct SceneObject
     struct SceneObject *next;
 
 }SceneObject, *SceneObjectPtr;
+
+//
+typedef struct PhysicsObject
+{
+    SceneObject* so;
+    vec3 velocity;
+
+}Particle, *ParticlePtr;
 
 SceneObject* fireRoot;
 ////////////////////////////////////////////////////////////////////////////////////
@@ -238,6 +246,11 @@ void strafeCamera(Camera *this, float amount)
     this->position = VectorAdd(this->position, strafeDirection);
     this->target = VectorAdd(this->target, strafeDirection);
     calcWorld2View(this);
+}
+void ascendDescend(Camera *this, float amount)
+{
+    this->position = VectorAdd(this->position  , ScalarMult(UP_VECTOR, amount));
+    this->target = VectorAdd(this->target ,  ScalarMult(UP_VECTOR, amount));
 }
 
 /* Some code about perspectives for reference.
@@ -391,6 +404,18 @@ void renderScene(SceneObject *scene, Camera *activeCamera)
     }
 
 }
+
+
+struct PhysicsObject* newPhysicsObject(Model* inModel, GLuint inShader, vec3 inPosition, float inScale)
+{
+    // Allocate memory
+    PhysicsObject* this;
+    this = (PhysicsObject *)malloc(sizeof(PhysicsObject));
+
+    this.so = newSceneObject(inModel, inShader, inPosition, inScale, particleRoot);
+    this.velocity = SetVector(0, 0, 0);
+    return this;
+}
 ////////////////////////////////////////////////////////////////////////////////////
 /*                                  Input                                         */
 ////////////////////////////////////////////////////////////////////////////////////
@@ -408,6 +433,9 @@ int rotRight = 0;
 // Strafe
 int strafeLeft = 0;
 int strafeRight = 0;
+
+int ascend = 0;
+int descend = 0;
 
 // Remove?
 int currentCamID = 0;
@@ -443,6 +471,12 @@ void KeyDown(unsigned char key,
         case 'e':
             strafeRight = 1;
             break;
+        case 'z':
+            ascend = 1;
+            break;
+        case 'x':
+            descend = 1;
+            break;
 
         default:
             break;
@@ -477,6 +511,12 @@ void KeyUp(unsigned char key,
         case 'e':
             strafeRight = 0;
             break;
+        case 'z':
+            ascend = 0;
+            break;
+        case 'x':
+            descend = 0;
+            break;
         default:
             break;
     }
@@ -487,7 +527,7 @@ void characterControl(Camera *this, float speed)
 {
 
     strafeCamera(this, speed*(strafeRight-strafeLeft)*dTime);
-
+    ascendDescend(this, speed*dTime*(ascend - descend));
     if(forward == 1)
     {
         moveCamForward(this, speed*dTime);
@@ -575,22 +615,23 @@ SceneObject* mainFire;
 
 void initSceneObjects()
 {
+
     // The root of scene1
     scene1Root = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     fireRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
+    particleRoot = newSceneObject(NULL, 0, ZERO_VECTOR, 1, NULL);
     // ---
 
-    cubeFloorObject = newSceneObject(cube, shadow_shader, SetVector(0, 0, 0), 9, scene1Root);
-    cubeFloorObject->scaleV.y = 0.1;
-    cubeFloorObject = newSceneObject(cube, shadow_shader, SetVector(-25, 0, -10), 9, scene1Root);
-    cubeFloorObject->scaleV.y = 0.1;
+    SceneObject* shadow1 = newSceneObject(cube, shadow_shader, SetVector(0, -0.45, 0), 9, scene1Root);
+    shadow1->scaleV.y = 0.1;
 
+    SceneObject* shadow2 = newSceneObject(cube, shadow_shader, SetVector(-25, 0, -10), 9, scene1Root);
+    shadow2->scaleV.y = 0.1;
 
     cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(0, -1, 0), 500, scene1Root);
     cubeFloorObject->scaleV.y = 1;
 
-    cubeFloorObject = newSceneObject(cube, ground_shader, SetVector(9, 1.5, 0), 3, scene1Root);
-
+    newSceneObject(cube, ground_shader, SetVector(9, 1.5, 0), 3, scene1Root);
 
     // The number of logs around the fire.
     int count_logs = 10;
@@ -600,7 +641,7 @@ void initSceneObjects()
         float log_radians = 2*PI*i/count_logs;
         //printf("%f \n",log_radians);
         // Create a log sceneobject and add it to the scene1root. Position 1 unit away from fire at log_radians angle.
-        SceneObject* fire_log = newSceneObject(cube, log_shader, SetVector(1*cos(log_radians), 1, 1*sin(log_radians)), 1.5, scene1Root);
+        SceneObject* fire_log = newSceneObject(cube, log_shader, SetVector(1*cos(log_radians), 0, 1*sin(log_radians)), 1.5, scene1Root);
         // Make the log a thin line
         fire_log->scaleV.y = 0.5;
         fire_log->scaleV.x = 0.5;
@@ -610,20 +651,21 @@ void initSceneObjects()
         fire_log->rotation.x = PI/4*sin(log_radians);
         fire_log->rotation.z = PI/4*cos(log_radians);
     }
-
-
     // The flame in the bonfire.
-    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 2.5, 0), 10, fireRoot);
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 1.5, 0), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
 
-    mainFire = newSceneObject(cube, fire_shader, SetVector(-25, 2.5, -10), 10, fireRoot);
+    mainFire = newSceneObject(cube, fire_shader, SetVector(0, 1.5, -10), 10, fireRoot);
     mainFire->scaleV.x = 5;
     mainFire->scaleV.z = 1;
 
     playerObject = newSceneObject(cube, log_shader, SetVector(0, 5, 15), 1, scene1Root);
     playerObject->scaleV = SetVector(1, 4, 1);
-
+    // Particles
+    newSceneObject(cube, ground_shader, SetVector(0, 1, 3), 0.2, particleRoot);
+    newSceneObject(cube, ground_shader, SetVector(1, 1, 2), 0.2, particleRoot);
+    newSceneObject(cube, ground_shader, SetVector(2, 1, 3), 0.2, particleRoot);
 
 }
 void initCameras()
@@ -734,10 +776,12 @@ void display(void)
     //glBlendFunc(GL_ONE, GL_ZERO);
     // Render the scene
     renderScene(scene1Root, playerCamera);
+    renderScene(particleRoot, playerCamera);
 
     // Additive blending for fire
     glBlendFunc(GL_ONE, GL_ONE);
     renderScene(fireRoot, playerCamera);
+
     //////////////////////////////////////
     //        End of render-loop        //
     //////////////////////////////////////

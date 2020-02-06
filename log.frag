@@ -187,7 +187,7 @@ float stage (float inValue, float steps)
 }
 void main(void)
 {
-	const vec3 midFire = vec3(0, 1.5, 0);
+	const vec3 midFire = vec3(0, 0.5, 0);
 
 	float x = exSurface.x;
 	float y = exSurface.y;
